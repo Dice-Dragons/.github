@@ -6,51 +6,41 @@ Hier werden die offiziellen XenForo 2.3+ Add-ons von [Hoffi](https://forum.dice-
 
 ---
 
-## 🏛️ Architektur-Übersicht
-
-Die Add-ons der Suite sind modular aufgebaut und greifen auf einheitliche Standards zurück:
-
-* **⭐ Base Library ([DD] Core Library)**: Das Fundament für UI-Komponenten (Multi-Toggle, Reset-Buttons, FontAwesome 5.x Autocomplete, Alphabet-Indizes, standardisierte Operatoren).
-* **📦 Extension Hubs ([DD] Custom Fields Extension & Index)**: Leistungsfähige Erweiterungen, auf denen spezialisierte Add-ons (z. B. Character Database, Shop, Resource Gallery) aufbauen.
-* **🔌 Standalone Add-ons**: Add-ons, die unabhängig von der Core-Bibliothek direkt auf XenForo 2.3+ aufsetzen.
-
----
-
 ## 📊 Live Suite-Dashboard
 
 Übersicht aller 29 aktiv gepflegten Add-ons der Suite:
 
-| Add-on | Version | Typ | Abhängigkeiten | Support |
-| :--- | :--- | :--- | :--- | :--- |
-| **[DD] - Core Library** | `1.6.3` | ⭐ Base Library | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
-| **[DD] Custom Fields Extension** | `1.8.1` | 📦 Extension Hub | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
-| **[DD] Index for Forums** | `1.3.0` | 📦 Extension Hub | `^1.5.0` | [Forum](https://forum.dice-dragons.de/forum/abc-index/) |
-| **[DD] Admin Tools** | `2.5.1` | Feature | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
-| **[DD] Avatar Style Chooser** | `1.0.0 Beta 1` | Feature | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
-| **[DD] Character Database** | `1.2.0 Beta 2` | Feature | `^1.6.2 + CustomFields` | [Forum](https://forum.dice-dragons.de/forum/character/) |
-| **[DD] Dice Roller** | `2.8.1` | Feature | `^1.6.1` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
-| **[DD] Font Manager** | `1.0.0 Release Candidate 1` | Feature | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/font-manager/) |
-| **[DD] Footer Designer** | `1.0.0 Alpha` | Feature | `^1.3.1` | - |
-| **[DD] Game Icons** | `1.0.0 Beta 1` | Feature | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
-| **[DD] Google Material Icons Interface** | `1.0.0 Beta 1` | Feature | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
-| **[DD] Icon for new Posts** | `1.1.2` | Feature | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/new-post-icon/) |
-| **[DD] Launchpad** | `1.0.0 Release Candidate 1` | Feature | `^1.6.3` | [Forum](https://forum.dice-dragons.de/) |
-| **[DD] License** | `1.1.1` | Feature | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/license-checker/) |
-| **[DD] Make Connector** | `1.0.1` | Feature | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/make_com/) |
-| **[DD] MyMiniFactory Connector** | `1.0.0 Beta 7` | Feature | `^1.3.1` | [Forum](https://forum.dice-dragons.de/) |
-| **[DD] Navigation Icons** | `1.0.0 Alpha` | Feature | `^1.4.3` | [Forum](https://forum.dice-dragons.de/forum/nav-icons/) |
-| **[DD] Node Icons & Tools** | `1.5.8` | Feature | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/node-icon/) |
-| **[DD] Notebook** | `1.1.0 Release Candidate 1` | Feature | `^1.4.2` | - |
-| **[DD] Notice Countdown** | `1.0.4` | Feature | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
-| **[DD] Notion Connect** | `1.1.1` | Feature | `^1.3.1` | - |
-| **[DD] Online Indicator options** | `1.0.1 Beta 1` | Feature | `^1.3.1` | - |
-| **[DD] Prefix Tools** | `1.3.6` | Feature | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
-| **[DD] RPG Tools** | `1.1.0` | Feature | `^1.3.1` | - |
-| **[DD] Resource Gallery** | `1.0.2` | Feature | `^1.4.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
-| **[DD] Simple Shop & Digital Goods** | `1.0.0 Alpha 1` | Feature | `^1.4.2 + CustomFields, Index` | [Forum](https://forum.dice-dragons.de/) |
-| **[DD] User Self Delete** | `1.0.0 Beta 1` | Feature | `^1.4.3` | [Forum](https://forum.dice-dragons.de/forum/user-self-delete/) |
-| **[DD] Bump** | `1.0.0` | 🔌 Standalone | `-` | [Forum](https://forum.dice-dragons.de/forum/bump/) |
-| **[DD] Discord Hook Enhancements** | `1.0.0` | 🔌 Standalone | `-` | - |
+| Add-on | Version | Abhängigkeiten | Support |
+| :--- | :--- | :--- | :--- |
+| **[DD] - Core Library** | `1.6.3` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
+| **[DD] Admin Tools** | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
+| **[DD] Avatar Style Chooser** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
+| **[DD] Bump** | `1.0.0` | `-` | [Forum](https://forum.dice-dragons.de/forum/bump/) |
+| **[DD] Character Database** | `1.2.0 Beta 2` | `^1.6.2 + CustomFields` | [Forum](https://forum.dice-dragons.de/forum/character/) |
+| **[DD] Custom Fields Extension** | `1.8.1` | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
+| **[DD] Dice Roller** | `2.8.1` | `^1.6.1` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
+| **[DD] Discord Hook Enhancements** | `1.0.0` | `-` | - |
+| **[DD] Font Manager** | `1.0.0 Release Candidate 1` | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/font-manager/) |
+| **[DD] Footer Designer** | `1.0.0 Alpha` | `^1.3.1` | - |
+| **[DD] Game Icons** | `1.0.0 Beta 1` | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
+| **[DD] Google Material Icons Interface** | `1.0.0 Beta 1` | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
+| **[DD] Icon for new Posts** | `1.1.2` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/new-post-icon/) |
+| **[DD] Index for Forums** | `1.3.0` | `^1.5.0` | [Forum](https://forum.dice-dragons.de/forum/abc-index/) |
+| **[DD] Launchpad** | `1.0.0 Release Candidate 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/) |
+| **[DD] License** | `1.1.1` | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/license-checker/) |
+| **[DD] Make Connector** | `1.0.1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/make_com/) |
+| **[DD] MyMiniFactory Connector** | `1.0.0 Beta 7` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/) |
+| **[DD] Navigation Icons** | `1.0.0 Alpha` | `^1.4.3` | [Forum](https://forum.dice-dragons.de/forum/nav-icons/) |
+| **[DD] Node Icons & Tools** | `1.5.8` | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/node-icon/) |
+| **[DD] Notebook** | `1.1.0 Release Candidate 1` | `^1.4.2` | - |
+| **[DD] Notice Countdown** | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
+| **[DD] Notion Connect** | `1.1.1` | `^1.3.1` | - |
+| **[DD] Online Indicator options** | `1.0.1 Beta 1` | `^1.3.1` | - |
+| **[DD] Prefix Tools** | `1.3.6` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
+| **[DD] RPG Tools** | `1.1.0` | `^1.3.1` | - |
+| **[DD] Resource Gallery** | `1.0.2` | `^1.4.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
+| **[DD] Simple Shop & Digital Goods** | `1.0.0 Alpha 1` | `^1.4.2 + CustomFields, Index` | [Forum](https://forum.dice-dragons.de/) |
+| **[DD] User Self Delete** | `1.0.0 Beta 1` | `^1.4.3` | [Forum](https://forum.dice-dragons.de/forum/user-self-delete/) |
 
 
 ---
