@@ -1,0 +1,102 @@
+name: "Add-on CI"
+
+on:
+  workflow_call:
+    inputs:
+      php-versions:
+        description: "JSON array of PHP versions to test against"
+        type: string
+        default: '["8.2", "8.4"]'
+        required: false
+      validate-composer:
+        description: "Validate composer.json and sync with addon.json"
+        type: boolean
+        default: true
+        required: false
+      check-forbidden-functions:
+        description: "Check for forbidden PHP functions (exec, system, shell_exec, etc.)"
+        type: boolean
+        default: true
+        required: false
+      check-fa-icons:
+        description: "Check for forbidden FontAwesome 6+ icons in templates"
+        type: boolean
+        default: true
+        required: false
+
+jobs:
+  php-syntax:
+    name: "PHP Syntax (PHP ${{ matrix.php-version }})"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ${{ fromJson(inputs.php-versions) }}
+
+    steps:
+      - name: Checkout Add-on
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+          extensions: json, mbstring, simplexml, dom
+
+      - name: Lint PHP Files (php -l)
+        run: |
+          echo "Scanning PHP files for syntax errors on PHP ${{ matrix.php-version }}..."
+          count=0
+          errors=0
+
+          while IFS= read -r -d '' file; do
+            count=$((count + 1))
+            if ! output=$(php -l "$file" 2>&1); then
+              echo "::error file=$file::$output"
+              errors=$((errors + 1))
+            fi
+          done < <(find . -type f -name "*.php" -not -path "*/vendor/*" -not -path "*/_build/*" -not -path "*/.git/*" -print0)
+
+          if [ "$errors" -gt 0 ]; then
+            echo "❌ $errors syntax error(s) found in $count PHP files."
+            exit 1
+          fi
+
+          echo "✅ All $count PHP files passed syntax check on PHP ${{ matrix.php-version }}."
+
+  metadata-and-policy:
+    name: "Metadata & Policy Checks"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Add-on
+        uses: actions/checkout@v4
+
+      - name: Checkout Shared CI Tools
+        uses: actions/checkout@v4
+        with:
+          repository: Dice-Dragons/.github
+          path: .github-shared
+
+      - name: Setup PHP 8.2 & Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+          extensions: json, mbstring
+
+      - name: Validate Composer Configuration
+        if: ${{ inputs.validate-composer }}
+        run: |
+          if [ -f "composer.json" ]; then
+            echo "Validating composer.json..."
+            composer validate --strict --no-check-publish --no-check-lock
+          else
+            echo "composer.json not present, skipping composer validate."
+          fi
+
+      - name: Run Add-on Metadata, Security & Policy Validator
+        run: |
+          php .github-shared/scripts/validate-addon.php .
