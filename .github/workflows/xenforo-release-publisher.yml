@@ -1,0 +1,574 @@
+name: XenForo Release Publisher
+
+on:
+  workflow_call:
+    inputs:
+      dry_run:
+        description: "Dry run - log details only, do not post to API"
+        required: false
+        type: boolean
+        default: false
+      update_description:
+        description: "Update resource description with _docs/readme.de.bbcode"
+        required: false
+        type: boolean
+        default: true
+      post_news:
+        description: "Post news thread to forum node 458"
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      XENFORO_API_KEY:
+        required: true
+      XENFORO_API_USER_ID:
+        required: true
+
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag name to test (leave empty for latest release)"
+        required: false
+        type: string
+      dry_run:
+        description: "Dry Run (Only log output)"
+        required: true
+        type: boolean
+        default: true
+      update_description:
+        description: "Update resource description with _docs/readme.de.bbcode"
+        required: false
+        type: boolean
+        default: true
+      post_news:
+        description: "Post news thread to forum node 458"
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Download Release Asset or Fallback
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_TAG: ${{ inputs.tag_name }}
+          EVENT_RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -e
+
+          TAG_NAME="$INPUT_TAG"
+          if [ -z "$TAG_NAME" ] && [ -n "$EVENT_RELEASE_TAG" ]; then
+            TAG_NAME="$EVENT_RELEASE_TAG"
+          fi
+
+          echo "Target Tag: ${TAG_NAME:-'Latest Release'}"
+
+          # Download attached zip assets
+          if [ -n "$TAG_NAME" ]; then
+            gh release download "$TAG_NAME" --pattern "*.zip" || true
+          else
+            gh release download --pattern "*.zip" || true
+          fi
+
+          ZIP_FILE=$(ls *.zip 2>/dev/null | head -n 1)
+
+          if [ -z "$ZIP_FILE" ] && [ -d "_releases" ]; then
+            ZIP_FILE=$(ls _releases/*.zip 2>/dev/null | head -n 1)
+          fi
+
+          # Fallback for manual workflow_dispatch test if no release ZIP is found
+          if [ -z "$ZIP_FILE" ]; then
+            echo "::warning::No release ZIP found. Creating dummy test ZIP for debug run..."
+            zip -r test-release.zip addon.json _docs/ 2>/dev/null || touch test-release.zip
+            ZIP_FILE="test-release.zip"
+          fi
+
+          echo "Found release asset: $ZIP_FILE"
+          echo "ZIP_FILE_PATH=$ZIP_FILE" >> $GITHUB_ENV
+
+      - name: Extract Metadata & Post Update to XenForo
+        env:
+          XF_API_KEY: ${{ secrets.XENFORO_API_KEY }}
+          XF_API_USER: ${{ secrets.XENFORO_API_USER_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          POST_NEWS: ${{ inputs.post_news }}
+          UPDATE_DESC: ${{ inputs.update_description }}
+          EVENT_RELEASE_BODY: ${{ github.event.release.body }}
+          EVENT_RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag_name }}
+        run: |
+          set -e
+
+          # 1. Locate addon.json - prefer extracting from ZIP file, fallback to repo root
+          ADDON_JSON="addon.json"
+          ZIP_FILE="$ZIP_FILE_PATH"
+
+          if [ -n "$ZIP_FILE" ] && [ -f "$ZIP_FILE" ]; then
+            ZIP_ADDON_ENTRY=$(unzip -l "$ZIP_FILE" 2>/dev/null | grep -oE '[^ ]*addon\.json$' | head -n 1 || true)
+            if [ -n "$ZIP_ADDON_ENTRY" ]; then
+              echo "Extracting addon.json directly from release asset: $ZIP_FILE ($ZIP_ADDON_ENTRY)..."
+              unzip -p "$ZIP_FILE" "$ZIP_ADDON_ENTRY" > /tmp/zip_addon.json 2>/dev/null || true
+              if [ -s /tmp/zip_addon.json ] && jq empty /tmp/zip_addon.json 2>/dev/null; then
+                ADDON_JSON="/tmp/zip_addon.json"
+                echo "SUCCESS: Using addon.json from release ZIP asset."
+              fi
+            fi
+          fi
+
+          if [ ! -f "$ADDON_JSON" ]; then
+            echo "::error::addon.json not found in ZIP asset or repository root!"
+            exit 1
+          fi
+
+          # Check if secrets are missing/empty
+          if [ -z "$XF_API_KEY" ]; then
+            echo "::error::XENFORO_API_KEY secret is missing or empty in GitHub Repository Secrets!"
+            exit 1
+          fi
+
+          if [ -z "$XF_API_USER" ]; then
+            echo "::error::XENFORO_API_USER_ID secret is missing or empty in GitHub Repository Secrets!"
+            exit 1
+          fi
+
+          # Clean secrets of potential carriage returns/whitespace
+          XF_API_KEY=$(echo "$XF_API_KEY" | tr -d '\r\n ')
+          XF_API_USER=$(echo "$XF_API_USER" | tr -d '\r\n ')
+
+          # Check if XF_API_USER is numeric
+          if ! [[ "$XF_API_USER" =~ ^[0-9]+$ ]]; then
+            echo "::warning::XENFORO_API_USER_ID is set to '$XF_API_USER', but XenForo API expects a numeric user_id (e.g. 1). Please update the secret to the integer user_id."
+          fi
+
+          # 2. Parse metadata from addon.json
+          ADDON_TITLE=$(jq -r '.title // empty' "$ADDON_JSON" | tr -d '\r\n')
+          VERSION_STRING=$(jq -r '.version_string // empty' "$ADDON_JSON" | tr -d '\r\n')
+          VERSION_ID=$(jq -r '.version_id // empty' "$ADDON_JSON" | tr -d '\r\n')
+          DESCRIPTION=$(jq -r '.description // empty' "$ADDON_JSON" | tr -d '\r\n')
+          FAQ_URL=$(jq -r '.faq_url // empty' "$ADDON_JSON" | tr -d '\r\n')
+          SUPPORT_URL=$(jq -r '.support_url // empty' "$ADDON_JSON" | tr -d '\r\n')
+          RESOURCE_ID=$(echo "$FAQ_URL" | grep -oE '[0-9]+/?$' | tr -d '/')
+
+          TITLE="Version ${VERSION_STRING}"
+
+          # Extract clean addon name without [DD] prefix for news title
+          ADDON_NAME=$(echo "$ADDON_TITLE" | sed -E 's/^\[DD\][[:space:]]*-?[[:space:]]*//')
+          if [ -z "$ADDON_NAME" ]; then
+            ADDON_NAME="$ADDON_TITLE"
+          fi
+          NEWS_TITLE="${ADDON_NAME} ${VERSION_STRING} veröffentlicht"
+
+          # Check if news thread should be posted
+          TAG_NAME="$INPUT_TAG"
+          if [ -z "$TAG_NAME" ] && [ -n "$EVENT_RELEASE_TAG" ]; then
+            TAG_NAME="$EVENT_RELEASE_TAG"
+          fi
+
+          RELEASE_BODY="$EVENT_RELEASE_BODY"
+          if [ -z "$RELEASE_BODY" ] && [ -n "$TAG_NAME" ]; then
+            RELEASE_BODY=$(gh release view "$TAG_NAME" --json body -q .body 2>/dev/null || true)
+          fi
+
+          SHOULD_POST_NEWS=true
+          if [ "$POST_NEWS" = "false" ]; then
+            SHOULD_POST_NEWS=false
+          fi
+          if echo "$RELEASE_BODY" | grep -q -- "<!-- no-news -->"; then
+            echo "Notice: <!-- no-news --> flag detected in release notes. Disabling news thread."
+            SHOULD_POST_NEWS=false
+          fi
+
+          # Helper function to convert version string (e.g. "2.7.1" or "2.7.1 Beta 1") to numeric version ID
+          parse_version_string_to_id() {
+            local ver_str="$1"
+            if [ -z "$ver_str" ] || [ "$ver_str" = "null" ]; then
+              echo "0"
+              return
+            fi
+
+            # Matches major.minor.patch and optionally any extra text
+            if [[ "$ver_str" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(.*)$ ]]; then
+              local major="${BASH_REMATCH[1]}"
+              local minor="${BASH_REMATCH[2]}"
+              local patch="${BASH_REMATCH[3]}"
+              local extra="${BASH_REMATCH[4]}"
+
+              # Trim whitespace from extra
+              extra=$(echo "$extra" | xargs)
+              local state_block=70 # default to stable
+
+              if [ -n "$extra" ]; then
+                local extra_lower=$(echo "$extra" | tr '[:upper:]' '[:lower:]')
+                if [[ "$extra_lower" =~ alpha[[:space:]_.-]*([0-9]+)? ]]; then
+                  local build="${BASH_REMATCH[1]:-1}"
+                  state_block=$((10 + build - 1))
+                elif [[ "$extra_lower" =~ beta[[:space:]_.-]*([0-9]+)? ]]; then
+                  local build="${BASH_REMATCH[1]:-1}"
+                  state_block=$((30 + build - 1))
+                elif [[ "$extra_lower" =~ (rc|release[[:space:]_.-]*candidate)[[:space:]_.-]*([0-9]+)? ]]; then
+                  local build="${BASH_REMATCH[2]:-1}"
+                  state_block=$((50 + build - 1))
+                elif [[ "$extra_lower" =~ patch[[:space:]_.-]*([0-9]+)? ]]; then
+                  local build="${BASH_REMATCH[1]:-1}"
+                  state_block=$((70 + build))
+                elif [[ "$extra_lower" =~ ^\.([0-9]+) ]]; then
+                  local build="${BASH_REMATCH[1]:-1}"
+                  state_block=$((70 + build))
+                elif [[ "$extra_lower" =~ stable || "$extra_lower" =~ final || "$extra_lower" =~ gold ]]; then
+                  state_block=70
+                fi
+              fi
+
+              local vid=$((major * 1000000 + minor * 10000 + patch * 100 + state_block))
+              echo "$vid"
+            else
+              echo "0"
+            fi
+          }
+
+          # 2. Query XenForo API for currently published live version string
+          LAST_VERSION_ID=0
+          RESOURCE_RESP=$(curl -s -S "https://forum.dice-dragons.de/api/resources/${RESOURCE_ID}" \
+            -H "XF-Api-Key: ${XF_API_KEY}" \
+            -H "XF-Api-User: ${XF_API_USER}" || true)
+
+          API_VER_STR=$(echo "$RESOURCE_RESP" | jq -r '.resource.version // .resource.CurrentVersion.version_string // empty' 2>/dev/null)
+          if [ -n "$API_VER_STR" ] && [ "$API_VER_STR" != "null" ]; then
+            LAST_VERSION_ID=$(parse_version_string_to_id "$API_VER_STR")
+          fi
+
+          echo "================ DEBUG ================"
+          echo "Parsed VERSION_ID:     '$VERSION_ID'"
+          echo "Parsed VERSION_STRING: '$VERSION_STRING'"
+          echo "Parsed RESOURCE_ID:    '$RESOURCE_ID'"
+          echo "Live LAST_VERSION_ID:  '$LAST_VERSION_ID'"
+          echo "API Live Version Str:  '$API_VER_STR'"
+          echo "API User ID:           '$XF_API_USER'"
+          echo "API Key Length:        ${#XF_API_KEY} chars"
+          echo "======================================="
+
+          # 3. Locate & Aggregate BBCode Changelog Files between LAST_VERSION_ID and VERSION_ID
+          MESSAGE_CONTENT=""
+          FOUND_FILES=()
+
+          if [ -d "./_docs" ]; then
+            for f in $(ls ./_docs/changelog.*.bbcode 2>/dev/null | sort -V); do
+              FILE_VID=$(echo "$f" | grep -oE '[0-9]+' | head -n 1 || true)
+              if [ -n "$FILE_VID" ] && [[ "$FILE_VID" =~ ^[0-9]+$ ]]; then
+                if [ "$FILE_VID" -gt "$LAST_VERSION_ID" ] && [ "$FILE_VID" -le "$VERSION_ID" ]; then
+                  FOUND_FILES+=("$f")
+                fi
+              fi
+            done
+          fi
+
+          if [ ${#FOUND_FILES[@]} -gt 0 ]; then
+            echo "SUCCESS: Aggregating ${#FOUND_FILES[@]} changelog file(s) (between live ID ${LAST_VERSION_ID} and release ID ${VERSION_ID}):"
+            for file in "${FOUND_FILES[@]}"; do
+              echo "  + $file"
+              if [ -n "$MESSAGE_CONTENT" ]; then
+                MESSAGE_CONTENT="${MESSAGE_CONTENT}"$'\n\n'
+              fi
+              MESSAGE_CONTENT="${MESSAGE_CONTENT}$(cat "$file")"
+            done
+          else
+            echo "Notice: No changelogs found in range (${LAST_VERSION_ID} < VID <= ${VERSION_ID}). Using single file fallback..."
+            if [ -f "./_docs/changelog.${VERSION_ID}.bbcode" ]; then
+              MESSAGE_CONTENT=$(cat "./_docs/changelog.${VERSION_ID}.bbcode")
+            elif [ -f "./_docs/changelog.${VERSION_STRING}.bbcode" ]; then
+              MESSAGE_CONTENT=$(cat "./_docs/changelog.${VERSION_STRING}.bbcode")
+            elif [ -f "./_docs/info.de.bbcode" ]; then
+              MESSAGE_CONTENT=$(cat "./_docs/info.de.bbcode")
+            else
+              MESSAGE_CONTENT="A new update to version [B]${VERSION_STRING}[/B] is now available."
+            fi
+          fi
+
+          # 3b. Detect newly committed/modified screenshots since last release tag
+          NEW_SCREENSHOTS=()
+          git fetch --tags --force 2>/dev/null || true
+
+          PREV_TAG=""
+          if [ -n "$TAG_NAME" ]; then
+            PREV_TAG=$(git describe --tags --abbrev=0 "${TAG_NAME}^" 2>/dev/null || true)
+          else
+            PREV_TAG=$(git tag --sort=-creatordate | sed -n '2p' || true)
+          fi
+
+          if [ -n "$PREV_TAG" ]; then
+            echo "Previous release tag identified: '$PREV_TAG'"
+            echo "Checking for new or modified screenshots between $PREV_TAG and ${TAG_NAME:-HEAD}..."
+            while IFS= read -r f; do
+              if [ -n "$f" ] && [ -f "$f" ]; then
+                NEW_SCREENSHOTS+=("$f")
+              fi
+            done < <(git diff --name-only --diff-filter=AM "$PREV_TAG" "${TAG_NAME:-HEAD}" -- "_docs/screenshots/" 2>/dev/null || true)
+          else
+            echo "No previous release tag found (initial release). Checking existing screenshots in _docs/screenshots/..."
+            if [ -d "_docs/screenshots" ]; then
+              while IFS= read -r f; do
+                if [ -n "$f" ] && [ -f "$f" ]; then
+                  NEW_SCREENSHOTS+=("$f")
+                fi
+              done < <(find _docs/screenshots -maxdepth 1 -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.webp" \) 2>/dev/null || true)
+            fi
+          fi
+
+          if [ ${#NEW_SCREENSHOTS[@]} -gt 0 ]; then
+            echo "SUCCESS: Found ${#NEW_SCREENSHOTS[@]} new/modified screenshot(s) to upload:"
+            for shot in "${NEW_SCREENSHOTS[@]}"; do
+              echo "  + $shot"
+            done
+          else
+            echo "Notice: No new or modified screenshots found since previous release. Skipping screenshot upload."
+          fi
+
+          # 3c. Locate Resource Description BBCode file
+          README_FILE=""
+          if [ "$UPDATE_DESC" != "false" ]; then
+            if [ -f "./_docs/readme.de.bbcode" ]; then
+              README_FILE="./_docs/readme.de.bbcode"
+            elif [ -f "./_docs/Readme.de.bbcode" ]; then
+              README_FILE="./_docs/Readme.de.bbcode"
+            elif [ -f "./_docs/readme.bbcode" ]; then
+              README_FILE="./_docs/readme.bbcode"
+            elif [ -f "./_docs/Readme.bbcode" ]; then
+              README_FILE="./_docs/Readme.bbcode"
+            elif [ -f "./_docs/readme.en.bbcode" ]; then
+              README_FILE="./_docs/readme.en.bbcode"
+            elif [ -f "./_docs/Readme.en.bbcode" ]; then
+              README_FILE="./_docs/Readme.en.bbcode"
+            fi
+          fi
+
+          if [ -n "$README_FILE" ]; then
+            echo "SUCCESS: Found resource description file: '$README_FILE' ($(wc -c < "$README_FILE") bytes)"
+          else
+            echo "Notice: No readme bbcode file found in ./_docs/ (or description update disabled). Skipping resource description update."
+          fi
+
+          ZIP_FILE="$ZIP_FILE_PATH"
+
+          # Dry Run Check
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "=== DRY RUN SUCCESSFUL ==="
+            echo "Target API Version:     https://forum.dice-dragons.de/api/resource-versions/"
+            echo "Target API Update:      https://forum.dice-dragons.de/api/resource-updates/"
+            echo "Target API Resource:    https://forum.dice-dragons.de/api/resources/${RESOURCE_ID}/"
+            echo "Title:                  $TITLE"
+            echo "Version:                $VERSION_STRING"
+            echo "Attachment:             $ZIP_FILE"
+            echo "Aggregated Files:       ${#FOUND_FILES[@]}"
+            echo "Description File:       ${README_FILE:-none}"
+            echo "New Screenshots:        ${#NEW_SCREENSHOTS[@]}"
+            for s in "${NEW_SCREENSHOTS[@]}"; do
+              echo "  + Screenshot:         $s"
+            done
+            echo "Message:"
+            echo "$MESSAGE_CONTENT"
+            if [ -n "$README_FILE" ]; then
+              echo "Description (Preview first 200 chars):"
+              head -c 200 "$README_FILE"
+              echo ""
+            fi
+            echo "Post News Thread:       $SHOULD_POST_NEWS"
+            echo "News Forum Node:        458 (Prefix: 612)"
+            echo "News Title:             $NEWS_TITLE"
+            echo "==========================="
+            exit 0
+          fi
+
+          # 4. XenForo API Execution
+          # Step A: Upload ZIP attachment via /api/attachments/new-key
+          echo "Step 1: Creating attachment key and uploading file..."
+          ATTACH_RESP=$(curl -s -S -X POST "https://forum.dice-dragons.de/api/attachments/new-key" \
+            -H "XF-Api-Key: ${XF_API_KEY}" \
+            -H "XF-Api-User: ${XF_API_USER}" \
+            -H "X-XF-Api-Key: ${XF_API_KEY}" \
+            -H "X-XF-Api-User: ${XF_API_USER}" \
+            -F "api_key=${XF_API_KEY}" \
+            -F "api_user=${XF_API_USER}" \
+            -F "type=resource_version" \
+            -F "context[resource_id]=${RESOURCE_ID}" \
+            -F "attachment=@${ZIP_FILE}")
+
+          ATTACH_KEY=$(echo "$ATTACH_RESP" | jq -r '.key // empty')
+
+          # Step B: Create New Downloadable Resource Version
+          if [ -n "$ATTACH_KEY" ]; then
+            echo "Attachment uploaded successfully. Key: $ATTACH_KEY"
+            echo "Step 2: Creating new resource version via /api/resource-versions/..."
+            curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-versions/" \
+              -H "XF-Api-Key: ${XF_API_KEY}" \
+              -H "XF-Api-User: ${XF_API_USER}" \
+              -H "X-XF-Api-Key: ${XF_API_KEY}" \
+              -H "X-XF-Api-User: ${XF_API_USER}" \
+              -F "api_key=${XF_API_KEY}" \
+              -F "api_user=${XF_API_USER}" \
+              -F "resource_id=${RESOURCE_ID}" \
+              -F "version_string=${VERSION_STRING}" \
+              -F "version_type=local" \
+              -F "version_attachment_key=${ATTACH_KEY}"
+          else
+            echo "::warning::Attachment upload via new-key failed or key empty. Response: $ATTACH_RESP"
+            echo "Attempting direct POST fallback to /api/resource-versions/..."
+            curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-versions/" \
+              -H "XF-Api-Key: ${XF_API_KEY}" \
+              -H "XF-Api-User: ${XF_API_USER}" \
+              -H "X-XF-Api-Key: ${XF_API_KEY}" \
+              -H "X-XF-Api-User: ${XF_API_USER}" \
+              -F "api_key=${XF_API_KEY}" \
+              -F "api_user=${XF_API_USER}" \
+              -F "resource_id=${RESOURCE_ID}" \
+              -F "version_string=${VERSION_STRING}" \
+              -F "version_type=local" \
+              -F "attachment=@${ZIP_FILE}"
+          fi
+
+          echo ""
+          # Step C: Create Aggregated Changelog / Release Post Update
+          echo "Step 3: Posting aggregated changelog update post via /api/resource-updates/..."
+          curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-updates/" \
+            -H "XF-Api-Key: ${XF_API_KEY}" \
+            -H "XF-Api-User: ${XF_API_USER}" \
+            -H "X-XF-Api-Key: ${XF_API_KEY}" \
+            -H "X-XF-Api-User: ${XF_API_USER}" \
+            -F "api_key=${XF_API_KEY}" \
+            -F "api_user=${XF_API_USER}" \
+            -F "resource_id=${RESOURCE_ID}" \
+            -F "title=${TITLE}" \
+            -F "message=${MESSAGE_CONTENT}"
+
+          # Step D: Upload Newly Committed Screenshots via CustomFields API
+          NEW_UPLOAD_COUNT=0
+          FINAL_ATT_IDS=()
+
+          # Auto-detect screenshot custom field ID ('screenshot' or 'screenshots')
+          SCREENSHOT_FIELD="screenshots"
+          if echo "$RESOURCE_RESP" | jq -e '.resource.custom_fields.screenshot != null or .resource.custom_fields_media.screenshot != null' >/dev/null 2>&1; then
+            SCREENSHOT_FIELD="screenshot"
+          elif echo "$RESOURCE_RESP" | jq -e '.resource.custom_fields.screenshots != null or .resource.custom_fields_media.screenshots != null' >/dev/null 2>&1; then
+            SCREENSHOT_FIELD="screenshots"
+          fi
+          echo "Detected screenshot custom field name: '$SCREENSHOT_FIELD'"
+
+          if [ ${#NEW_SCREENSHOTS[@]} -gt 0 ]; then
+            echo ""
+            echo "Step 4: Uploading ${#NEW_SCREENSHOTS[@]} new/modified screenshot(s) for resource ${RESOURCE_ID}..."
+
+            # 1. Collect existing attachment IDs from resource API response to preserve them
+            if [ -n "$RESOURCE_RESP" ]; then
+              while IFS= read -r existing_id; do
+                if [ -n "$existing_id" ] && [[ "$existing_id" =~ ^[0-9]+$ ]]; then
+                  FINAL_ATT_IDS+=("$existing_id")
+                fi
+              done < <(echo "$RESOURCE_RESP" | jq -r ".resource.custom_fields_media.${SCREENSHOT_FIELD}[].attachment_id // .resource.custom_fields_media.screenshot[].attachment_id // .resource.custom_fields_media.screenshots[].attachment_id // empty" 2>/dev/null || true)
+            fi
+
+            echo "Preserving ${#FINAL_ATT_IDS[@]} existing screenshot attachment(s) on resource."
+
+            # 2. Upload newly committed screenshots via /api/cv6-custom-fields/upload
+            for shot in "${NEW_SCREENSHOTS[@]}"; do
+              echo "Uploading $shot via /api/cv6-custom-fields/upload..."
+              SHOT_RESP=$(curl -s -S -X POST "https://forum.dice-dragons.de/api/cv6-custom-fields/upload" \
+                -H "XF-Api-Key: ${XF_API_KEY}" \
+                -H "XF-Api-User: ${XF_API_USER}" \
+                -H "X-XF-Api-Key: ${XF_API_KEY}" \
+                -H "X-XF-Api-User: ${XF_API_USER}" \
+                -F "api_key=${XF_API_KEY}" \
+                -F "api_user=${XF_API_USER}" \
+                -F "field_id=${SCREENSHOT_FIELD}" \
+                -F "field_source=resource" \
+                -F "content_id=${RESOURCE_ID}" \
+                -F "upload=@${shot}")
+
+              SHOT_ID=$(echo "$SHOT_RESP" | jq -r '.attachment_id // empty')
+              if [ -n "$SHOT_ID" ] && [[ "$SHOT_ID" =~ ^[0-9]+$ ]]; then
+                echo "Uploaded successfully: Attachment ID $SHOT_ID"
+                FINAL_ATT_IDS+=("$SHOT_ID")
+                NEW_UPLOAD_COUNT=$((NEW_UPLOAD_COUNT + 1))
+              else
+                echo "::warning::Failed to upload screenshot '$shot'. Response: $SHOT_RESP"
+              fi
+            done
+          fi
+
+          # Step E: Update Resource Details (Description and/or Screenshots) via /api/resources/{id}/
+          RESOURCE_UPDATE_ARGS=()
+
+          if [ -n "$README_FILE" ]; then
+            echo ""
+            echo "Adding resource description from '$README_FILE' to resource update..."
+            RESOURCE_UPDATE_ARGS+=(-F "description=<${README_FILE}")
+          fi
+
+          if [ "$NEW_UPLOAD_COUNT" -gt 0 ]; then
+            echo "Associating total ${#FINAL_ATT_IDS[@]} screenshot(s) with resource ${RESOURCE_ID}..."
+            for att_id in "${FINAL_ATT_IDS[@]}"; do
+              RESOURCE_UPDATE_ARGS+=(-F "custom_fields[${SCREENSHOT_FIELD}][]=$att_id")
+            done
+          fi
+
+          if [ ${#RESOURCE_UPDATE_ARGS[@]} -gt 0 ]; then
+            echo ""
+            echo "Step 5: Updating resource ${RESOURCE_ID} details via /api/resources/${RESOURCE_ID}/..."
+            UPDATE_RES=$(curl -s -S -X POST "https://forum.dice-dragons.de/api/resources/${RESOURCE_ID}/" \
+              -H "XF-Api-Key: ${XF_API_KEY}" \
+              -H "XF-Api-User: ${XF_API_USER}" \
+              -H "X-XF-Api-Key: ${XF_API_KEY}" \
+              -H "X-XF-Api-User: ${XF_API_USER}" \
+              -F "api_key=${XF_API_KEY}" \
+              -F "api_user=${XF_API_USER}" \
+              "${RESOURCE_UPDATE_ARGS[@]}")
+
+            if echo "$UPDATE_RES" | grep -q '"success":true'; then
+              echo "Resource ${RESOURCE_ID} updated successfully."
+            else
+              echo "::warning::Resource update response: $UPDATE_RES"
+            fi
+          fi
+
+          # Step 6: Post News Thread to Forum (Node 458, Prefix 612)
+          if [ "$SHOULD_POST_NEWS" = "true" ]; then
+            echo ""
+            echo "Step 6: Posting news thread to forum node 458 via /api/threads/..."
+
+            NEWS_MESSAGE="[HEADING=1]${ADDON_NAME} – Version ${VERSION_STRING}[/HEADING]"
+            if [ -n "$DESCRIPTION" ]; then
+              NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"${DESCRIPTION}"
+            fi
+            NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"Eine neue Version von [B]${ADDON_NAME}[/B] steht ab sofort zum Download bereit!"$'\n\n'"[HEADING=2]Was ist neu in Version ${VERSION_STRING}?[/HEADING]"$'\n\n'"[QUOTE]"$'\n'"${MESSAGE_CONTENT}"$'\n'"[/QUOTE]"$'\n\n'"[HEADING=2]Links & Download[/HEADING]"$'\n\n'"* [B]Download:[/B] [URL='${FAQ_URL}']Add-on im Ressourcen-Bereich herunterladen[/URL]"
+            if [ -n "$SUPPORT_URL" ]; then
+              NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n'"* [B]Hilfe & Diskussion:[/B] [URL='${SUPPORT_URL}']Zum Support-Forum[/URL]"
+            fi
+
+            NEWS_RESP=$(curl -s -S -X POST "https://forum.dice-dragons.de/api/threads/" \
+              -H "XF-Api-Key: ${XF_API_KEY}" \
+              -H "XF-Api-User: ${XF_API_USER}" \
+              -H "X-XF-Api-Key: ${XF_API_KEY}" \
+              -H "X-XF-Api-User: ${XF_API_USER}" \
+              -F "api_key=${XF_API_KEY}" \
+              -F "api_user=${XF_API_USER}" \
+              -F "node_id=458" \
+              -F "prefix_id=612" \
+              -F "title=${NEWS_TITLE}" \
+              -F "message=${NEWS_MESSAGE}")
+
+            THREAD_ID=$(echo "$NEWS_RESP" | jq -r '.thread.thread_id // empty')
+            if [ -n "$THREAD_ID" ] && [[ "$THREAD_ID" =~ ^[0-9]+$ ]]; then
+              echo "SUCCESS: News thread created successfully! Thread ID: $THREAD_ID (URL: https://forum.dice-dragons.de/threads/$THREAD_ID/)"
+            else
+              echo "::warning::Failed to create news thread. Response: $NEWS_RESP"
+            fi
+          else
+            echo ""
+            echo "Step 6: Skipping news thread (disabled via input or <!-- no-news --> flag)."
+          fi
