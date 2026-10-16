@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout Add-on
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2
@@ -71,10 +71,10 @@ jobs:
 
     steps:
       - name: Checkout Add-on
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Checkout Shared CI Tools
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Dice-Dragons/.github
           path: .github-shared
