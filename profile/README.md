@@ -31,7 +31,7 @@ Hier werden die offiziellen XenForo 2.3+ Add-ons von [Hoffi](https://forum.dice-
 | **[DD] Notebook** | `1.1.0 Release Candidate 1` | `^1.4.2` | - |
 | **[DD] Notice Countdown** | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
 | **[DD] Prefix Tools** | `1.3.6` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
-| **[DD] Resource Gallery** | `1.0.2` | `^1.4.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
+| **[DD] Resource Gallery** | `1.1.0 Release Candidate 1` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
 
 
 ---
