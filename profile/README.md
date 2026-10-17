@@ -21,7 +21,6 @@ Hier werden die offiziellen XenForo 2.3+ Add-ons von [Hoffi](https://forum.dice-
 | **[DD] Dice Roller** | `2.8.1` | `^1.6.1` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
 | **[DD] Discord Hook Enhancements** | `1.0.0` | `-` | - |
 | **[DD] Font Manager** | `1.0.0 Release Candidate 1` | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/font-manager/) |
-| **[DD] Game Icons** | `1.0.0 Beta 1` | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
 | **[DD] Google Material Icons Interface** | `1.0.0 Beta 1` | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
 | **[DD] Icon for new Posts** | `1.1.2` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/new-post-icon/) |
 | **[DD] Index for Forums** | `1.3.0` | `^1.5.0` | [Forum](https://forum.dice-dragons.de/forum/abc-index/) |
@@ -32,6 +31,7 @@ Hier werden die offiziellen XenForo 2.3+ Add-ons von [Hoffi](https://forum.dice-
 | **[DD] Notice Countdown** | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
 | **[DD] Prefix Tools** | `1.3.6` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
 | **[DD] Resource Gallery** | `1.1.0 Release Candidate 1` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
+| **[cv6] Game Icons** | `1.0.0 Beta 1` | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
 
 
 ---
