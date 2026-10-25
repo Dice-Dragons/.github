@@ -136,46 +136,35 @@ if (file_exists($composerJsonFile)) {
         // Synchronization with addon.json
         if (isset($addonJson) && is_array($addonJson)) {
             $slugMap = [
-                'AvatarStyles' => 'avatar-styles',
-                'Bump' => 'bump',
-                'CharDice' => 'char-dice',
-                'CharEdit' => 'char-edit',
-                'CollapseAdminLists' => 'collapse-admin-lists',
-                'Core' => 'core',
-                'CustomFields' => 'custom-fields',
-                'DiceRoller' => 'dice-roller',
-                'DiscordHook' => 'discord-hook',
-                'FontManager' => 'font-manager',
-                'Footer' => 'footer',
-                'IconsGame' => 'icons-game',
-                'IconsMaterial' => 'icons-material',
-                'Index' => 'index',
-                'Launchpad' => 'launchpad',
-                'License' => 'license',
-                'Make' => 'make',
                 'MMF' => 'mmf',
-                'NavIcons' => 'nav-icons',
-                'NewPostIcon' => 'new-post-icon',
-                'NodeIcon' => 'node-icon',
-                'Notebook' => 'notebook',
-                'NoticeCountdown' => 'notice-countdown',
-                'Notion' => 'notion',
-                'Online' => 'online',
-                'Prefix' => 'prefix',
                 'RPG' => 'rpg',
-                'ResourceGallery' => 'resource-gallery',
-                'Shop' => 'shop',
-                'UserSelfDelete' => 'user-self-delete',
             ];
 
             $addonRequires = $addonJson['require'] ?? [];
+            $expectedPackages = [];
 
             // Check every cv6 dependency in addon.json is present in composer.json
             foreach ($addonRequires as $reqKey => $spec) {
                 if (str_starts_with($reqKey, 'cv6/')) {
                     $depFolder = substr($reqKey, 4);
-                    $depSlug = $slugMap[$depFolder] ?? strtolower($depFolder);
-                    $expectedPkg = "dice-dragons/{$depSlug}";
+                    $expectedPkg = null;
+
+                    // If running in multi-addon workspace, read neighbor composer.json directly
+                    $neighborComposer = dirname((string)realpath($targetDir)) . DIRECTORY_SEPARATOR . $depFolder . DIRECTORY_SEPARATOR . 'composer.json';
+                    if (file_exists($neighborComposer)) {
+                        $neighborData = json_decode((string)file_get_contents($neighborComposer), true);
+                        if (is_array($neighborData) && !empty($neighborData['name']) && is_string($neighborData['name'])) {
+                            $expectedPkg = $neighborData['name'];
+                        }
+                    }
+
+                    if ($expectedPkg === null) {
+                        $depSlug = $slugMap[$depFolder]
+                            ?? strtolower((string)preg_replace('/(?<!^)(?:[A-Z][a-z]|(?<=[a-z])[A-Z])/', '-$0', $depFolder));
+                        $expectedPkg = "dice-dragons/{$depSlug}";
+                    }
+
+                    $expectedPackages[$expectedPkg] = $reqKey;
 
                     if (!isset($composerRequires[$expectedPkg])) {
                         logError($composerJsonFile, 1, "composer.json is out of sync with addon.json: missing dependency '{$expectedPkg}' (required by '{$reqKey}' in addon.json).");
@@ -186,20 +175,7 @@ if (file_exists($composerJsonFile)) {
             // Check if composer.json has extra dice-dragons dependencies not in addon.json
             foreach ($composerRequires as $pkg => $constraint) {
                 if (str_starts_with($pkg, 'dice-dragons/')) {
-                    $slug = substr($pkg, 13);
-                    $found = false;
-                    foreach ($addonRequires as $reqKey => $spec) {
-                        if (str_starts_with($reqKey, 'cv6/')) {
-                            $depFolder = substr($reqKey, 4);
-                            $depSlug = $slugMap[$depFolder] ?? strtolower($depFolder);
-                            if ($depSlug === $slug) {
-                                $found = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!$found) {
+                    if (!isset($expectedPackages[$pkg])) {
                         logError($composerJsonFile, 1, "composer.json contains orphaned dependency '{$pkg}' which is not defined in addon.json.");
                     }
                 }
