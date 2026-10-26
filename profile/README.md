@@ -16,7 +16,6 @@ Hier werden die offiziellen XenForo 2.3+ Add-ons von [Hoffi](https://forum.dice-
 | **[DD] Admin Tools** | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
 | **[DD] Avatar Style Chooser** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
 | **[DD] Bump** | `1.0.0` | `-` | [Forum](https://forum.dice-dragons.de/forum/bump/) |
-| **[DD] Character Database** | `1.2.0 Beta 2` | `^1.6.2 + CustomFields` | [Forum](https://forum.dice-dragons.de/forum/character/) |
 | **[DD] Custom Fields Extension** | `1.8.1` | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
 | **[DD] Dice Roller** | `2.8.1` | `^1.6.1` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
 | **[DD] Discord Hook Enhancements** | `1.0.0` | `-` | - |
@@ -31,6 +30,7 @@ Hier werden die offiziellen XenForo 2.3+ Add-ons von [Hoffi](https://forum.dice-
 | **[DD] Notice Countdown** | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
 | **[DD] Prefix Tools** | `1.3.6` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
 | **[DD] Resource Gallery** | `1.1.0 Release Candidate 1` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
+| **[DD] Timeline BB-Code** | `1.0.0 Release Candidate 3` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/) |
 | **[cv6] Game Icons** | `1.0.0 Beta 1` | `^1.6.0` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
 
 
