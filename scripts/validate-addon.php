@@ -251,6 +251,84 @@ foreach ($templateFiles as $file) {
 echo "  ✓ Scanned {$faScanned} templates for icon policy compliance.\n";
 
 // --------------------------------------------------------------------------
+// 5. XFCP Class Extension Validation
+// --------------------------------------------------------------------------
+echo "\n🔍 Checking XFCP class extensions...\n";
+$extDir = $targetDir . DIRECTORY_SEPARATOR . '_output' . DIRECTORY_SEPARATOR . 'class_extensions';
+$extCount = 0;
+if (is_dir($extDir)) {
+    $extFiles = glob($extDir . DIRECTORY_SEPARATOR . '*.json') ?: [];
+    // Known XF 2.3 core overridable methods that do NOT declare a return type in XF core
+    $untypedXfCoreMethods = [
+        '_preSave', '_postSave', '_preDelete', '_postDelete', 'getStructure',
+        'isValid', 'validateSpecialCriteriaValue', 'setupThreadCreate',
+        'finalizeThreadCreate', 'fnAvatar', 'fnPrefix', 'fnUserBanners',
+    ];
+
+    foreach ($extFiles as $jsonFile) {
+        if (basename($jsonFile) === '_metadata.json') {
+            continue;
+        }
+        $extCount++;
+        $data = json_decode((string)file_get_contents($jsonFile), true);
+        if (!is_array($data) || empty($data['from_class']) || empty($data['to_class'])) {
+            logError($jsonFile, 1, "Invalid class_extension JSON definition.");
+            continue;
+        }
+
+        $fromClass = ltrim((string)$data['from_class'], '\\');
+        $toClass = ltrim((string)$data['to_class'], '\\');
+        $parts = explode('\\', $toClass);
+        if (count($parts) < 3) {
+            continue;
+        }
+
+        $relPath = implode(DIRECTORY_SEPARATOR, array_slice($parts, 2)) . '.php';
+        $phpFile = $targetDir . DIRECTORY_SEPARATOR . $relPath;
+
+        if (!file_exists($phpFile)) {
+            logError($jsonFile, 1, "Class extension target PHP file missing: {$relPath} (for {$toClass}).");
+            continue;
+        }
+
+        $shortName = end($parts);
+        $expectedXfcp = 'XFCP_' . $shortName;
+        $code = (string)file_get_contents($phpFile);
+
+        if (!preg_match('/class\s+' . preg_quote($shortName, '/') . '\s+extends\s+' . preg_quote($expectedXfcp, '/') . '\b/i', $code)) {
+            logError($phpFile, 1, "Class '{$shortName}' must extend '{$expectedXfcp}'.");
+        }
+
+        if (str_starts_with($fromClass, 'XF\\')) {
+            $extMethods = parsePhpClassMethods($code);
+            foreach ($extMethods as $mName => $mInfo) {
+                $isActionMethod = str_starts_with($mName, 'action') && str_contains($fromClass, '\\Controller\\');
+                if (($isActionMethod || in_array($mName, $untypedXfCoreMethods, true)) && $mInfo['return_type'] !== null) {
+                    logError(
+                        $phpFile,
+                        $mInfo['line'],
+                        "XFCP co-install trap: {$toClass}::{$mName}() adds return type ': {$mInfo['return_type']}', but parent {$fromClass}::{$mName}() has NO return type in XenForo Core."
+                    );
+                }
+            }
+        }
+    }
+}
+echo "  ✓ Checked {$extCount} class extension(s).\n";
+
+// --------------------------------------------------------------------------
+// 6. Setup.php Install / Uninstall Schema Symmetry
+// --------------------------------------------------------------------------
+echo "\n🔍 Checking Setup.php install/uninstall symmetry...\n";
+$setupFile = $targetDir . DIRECTORY_SEPARATOR . 'Setup.php';
+if (file_exists($setupFile)) {
+    validateSetupSymmetry($setupFile);
+    echo "  ✓ Setup.php checked.\n";
+} else {
+    echo "  ✓ No Setup.php present.\n";
+}
+
+// --------------------------------------------------------------------------
 // Summary & Exit
 // --------------------------------------------------------------------------
 echo "\n=====================================================\n";
@@ -407,4 +485,245 @@ function scanPhpFileForForbiddenFunctions(string $filePath, array $forbidden): a
     }
 
     return $violations;
+}
+
+function parsePhpClassMethods(string $code): array
+{
+    $tokens = @token_get_all($code);
+    $count = count($tokens);
+    $methods = [];
+
+    $braceDepth = 0;
+    $inClass = false;
+    $classBraceDepth = 0;
+
+    for ($i = 0; $i < $count; $i++) {
+        $token = $tokens[$i];
+
+        if ($token === '{') {
+            $braceDepth++;
+            continue;
+        }
+        if ($token === '}') {
+            $braceDepth--;
+            if ($inClass && $braceDepth < $classBraceDepth) {
+                $inClass = false;
+            }
+            continue;
+        }
+
+        if (is_array($token) && $token[0] === T_CLASS) {
+            for ($j = $i + 1; $j < $count; $j++) {
+                if ($tokens[$j] === '{') {
+                    $braceDepth++;
+                    $inClass = true;
+                    $classBraceDepth = $braceDepth;
+                    $i = $j;
+                    break;
+                }
+            }
+            continue;
+        }
+
+        if ($inClass && $braceDepth === $classBraceDepth && is_array($token) && $token[0] === T_FUNCTION) {
+            $line = $token[2];
+            $methodName = null;
+            $openParenIdx = null;
+            for ($j = $i + 1; $j < $count; $j++) {
+                $t = $tokens[$j];
+                if (is_array($t) && $t[0] === T_STRING && $methodName === null) {
+                    $methodName = $t[1];
+                } elseif ($t === '(') {
+                    $openParenIdx = $j;
+                    break;
+                }
+            }
+
+            if ($methodName === null || $openParenIdx === null) {
+                continue;
+            }
+
+            $parenDepth = 1;
+            $closeParenIdx = null;
+            for ($j = $openParenIdx + 1; $j < $count; $j++) {
+                $t = $tokens[$j];
+                if ($t === '(') {
+                    $parenDepth++;
+                } elseif ($t === ')') {
+                    $parenDepth--;
+                    if ($parenDepth === 0) {
+                        $closeParenIdx = $j;
+                        break;
+                    }
+                }
+            }
+
+            if ($closeParenIdx === null) {
+                continue;
+            }
+
+            $returnType = null;
+            $colonFound = false;
+            $retParts = [];
+            for ($j = $closeParenIdx + 1; $j < $count; $j++) {
+                $t = $tokens[$j];
+                if ($t === '{' || $t === ';') {
+                    break;
+                }
+                if ($t === ':') {
+                    $colonFound = true;
+                    continue;
+                }
+                if ($colonFound) {
+                    if (is_array($t)) {
+                        if (in_array($t[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+                            continue;
+                        }
+                        $retParts[] = $t[1];
+                    } else {
+                        $retParts[] = $t;
+                    }
+                }
+            }
+            if (!empty($retParts)) {
+                $returnType = implode('', $retParts);
+            }
+
+            $methods[$methodName] = [
+                'line' => $line,
+                'return_type' => $returnType,
+            ];
+        }
+    }
+
+    return $methods;
+}
+
+function validateSetupSymmetry(string $setupFile): void
+{
+    $code = (string)file_get_contents($setupFile);
+    $methodBodies = extractPhpMethodBodies($code);
+
+    $installCode = '';
+    $uninstallCode = '';
+    foreach ($methodBodies as $mName => $body) {
+        if (preg_match('/^installStep\d+$/i', $mName)) {
+            $installCode .= "\n" . $body;
+        } elseif (preg_match('/^uninstallStep\d+$/i', $mName)) {
+            $uninstallCode .= "\n" . $body;
+        }
+    }
+
+    $callsCreateTables = (bool)preg_match('/\$this->createTables\s*\(/', $installCode);
+    $callsDropTables = (bool)preg_match('/\$this->dropTables\s*\(/', $uninstallCode);
+
+    if ($callsCreateTables && !$callsDropTables) {
+        logWarning($setupFile, 1, "Setup.php calls \$this->createTables() in installStep*, but never calls \$this->dropTables() in uninstallStep*.");
+    }
+
+    $getTablesBody = $methodBodies['getTables'] ?? '';
+    $traitTables = [];
+    if (preg_match_all('/\$tables\[\s*[\'"]([a-zA-Z0-9_]+)[\'"]\s*\]/', $getTablesBody, $m)) {
+        $traitTables = $m[1];
+    }
+
+    $createdTables = [];
+    if (preg_match_all('/createTable\s*\(\s*[\'"]([a-zA-Z0-9_]+)[\'"]/', $installCode, $m)) {
+        $createdTables = array_unique($m[1]);
+    }
+
+    $droppedTables = [];
+    if (preg_match_all('/dropTable\s*\(\s*[\'"]([a-zA-Z0-9_]+)[\'"]/', $uninstallCode, $m)) {
+        $droppedTables = array_unique($m[1]);
+    }
+    if ($callsDropTables) {
+        $droppedTables = array_unique(array_merge($droppedTables, $traitTables));
+    }
+
+    foreach ($createdTables as $tbl) {
+        if (!in_array($tbl, $droppedTables, true)) {
+            logWarning($setupFile, 1, "Setup.php creates table '{$tbl}' in installStep*, but does not drop it in uninstallStep*.");
+        }
+    }
+
+    $ownTables = array_unique(array_merge($traitTables, $createdTables));
+    $alteredForeignTables = [];
+
+    if (preg_match_all('/alterTable\s*\(\s*[\'"]([a-zA-Z0-9_]+)[\'"]/', $installCode, $m)) {
+        foreach (array_unique($m[1]) as $tbl) {
+            if (!in_array($tbl, $ownTables, true)) {
+                $alteredForeignTables[] = $tbl;
+            }
+        }
+    }
+    if (preg_match_all('/addColumns?IfMissing\s*\(\s*[\'"]([a-zA-Z0-9_]+)[\'"]/', $installCode, $m)) {
+        foreach (array_unique($m[1]) as $tbl) {
+            if (!in_array($tbl, $ownTables, true)) {
+                $alteredForeignTables[] = $tbl;
+            }
+        }
+    }
+
+    $alteredForeignTables = array_unique($alteredForeignTables);
+
+    $uninstalledForeignTables = [];
+    if (preg_match_all('/(?:alterTable|dropColumnIfExists|dropColumns?IfExists)\s*\(\s*[\'"]([a-zA-Z0-9_]+)[\'"]/', $uninstallCode, $m)) {
+        $uninstalledForeignTables = array_unique($m[1]);
+    }
+
+    foreach ($alteredForeignTables as $tbl) {
+        if (!in_array($tbl, $uninstalledForeignTables, true)) {
+            logWarning($setupFile, 1, "Setup.php alters table '{$tbl}' in installStep*, but does not revert/drop columns on '{$tbl}' in uninstallStep*.");
+        }
+    }
+}
+
+function extractPhpMethodBodies(string $code): array
+{
+    $tokens = @token_get_all($code);
+    $count = count($tokens);
+    $bodies = [];
+
+    for ($i = 0; $i < $count; $i++) {
+        $token = $tokens[$i];
+        if (is_array($token) && $token[0] === T_FUNCTION) {
+            $methodName = null;
+            $openBraceIdx = null;
+            for ($j = $i + 1; $j < $count; $j++) {
+                $t = $tokens[$j];
+                if (is_array($t) && $t[0] === T_STRING && $methodName === null) {
+                    $methodName = $t[1];
+                } elseif ($t === '{') {
+                    $openBraceIdx = $j;
+                    break;
+                } elseif ($t === ';') {
+                    break;
+                }
+            }
+
+            if ($methodName === null || $openBraceIdx === null) {
+                continue;
+            }
+
+            $depth = 1;
+            $bodyParts = [];
+            for ($j = $openBraceIdx + 1; $j < $count; $j++) {
+                $t = $tokens[$j];
+                if ($t === '{') {
+                    $depth++;
+                } elseif ($t === '}') {
+                    $depth--;
+                    if ($depth === 0) {
+                        $i = $j;
+                        break;
+                    }
+                }
+                $bodyParts[] = is_array($t) ? $t[1] : $t;
+            }
+
+            $bodies[$methodName] = implode('', $bodyParts);
+        }
+    }
+
+    return $bodies;
 }
