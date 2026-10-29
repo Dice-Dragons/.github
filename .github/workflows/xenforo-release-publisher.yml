@@ -9,7 +9,7 @@ on:
         type: boolean
         default: false
       update_description:
-        description: "Update resource description with _docs/readme.de.bbcode"
+        description: "Update resource description (_docs/readme.bbcode) and custom_fields[german] (_docs/readme.de.bbcode)"
         required: false
         type: boolean
         default: true
@@ -36,7 +36,7 @@ on:
         type: boolean
         default: true
       update_description:
-        description: "Update resource description with _docs/readme.de.bbcode"
+        description: "Update resource description (_docs/readme.bbcode) and custom_fields[german] (_docs/readme.de.bbcode)"
         required: false
         type: boolean
         default: true
@@ -331,14 +331,11 @@ jobs:
             echo "Notice: No new or modified screenshots found since previous release. Skipping screenshot upload."
           fi
 
-          # 3c. Locate Resource Description BBCode file
+          # 3c. Locate Resource Description BBCode files (English -> description, German -> custom_fields[german])
           README_FILE=""
+          README_DE_FILE=""
           if [ "$UPDATE_DESC" != "false" ]; then
-            if [ -f "./_docs/readme.de.bbcode" ]; then
-              README_FILE="./_docs/readme.de.bbcode"
-            elif [ -f "./_docs/Readme.de.bbcode" ]; then
-              README_FILE="./_docs/Readme.de.bbcode"
-            elif [ -f "./_docs/readme.bbcode" ]; then
+            if [ -f "./_docs/readme.bbcode" ]; then
               README_FILE="./_docs/readme.bbcode"
             elif [ -f "./_docs/Readme.bbcode" ]; then
               README_FILE="./_docs/Readme.bbcode"
@@ -346,13 +343,27 @@ jobs:
               README_FILE="./_docs/readme.en.bbcode"
             elif [ -f "./_docs/Readme.en.bbcode" ]; then
               README_FILE="./_docs/Readme.en.bbcode"
+            elif [ -f "./_docs/readme.de.bbcode" ]; then
+              README_FILE="./_docs/readme.de.bbcode"
+            elif [ -f "./_docs/Readme.de.bbcode" ]; then
+              README_FILE="./_docs/Readme.de.bbcode"
+            fi
+
+            if [ -f "./_docs/readme.de.bbcode" ]; then
+              README_DE_FILE="./_docs/readme.de.bbcode"
+            elif [ -f "./_docs/Readme.de.bbcode" ]; then
+              README_DE_FILE="./_docs/Readme.de.bbcode"
             fi
           fi
 
           if [ -n "$README_FILE" ]; then
-            echo "SUCCESS: Found resource description file: '$README_FILE' ($(wc -c < "$README_FILE") bytes)"
+            echo "SUCCESS: Found primary (English) resource description file: '$README_FILE' ($(wc -c < "$README_FILE") bytes)"
           else
             echo "Notice: No readme bbcode file found in ./_docs/ (or description update disabled). Skipping resource description update."
+          fi
+
+          if [ -n "$README_DE_FILE" ]; then
+            echo "SUCCESS: Found German resource description file for custom_fields[german]: '$README_DE_FILE' ($(wc -c < "$README_DE_FILE") bytes)"
           fi
 
           ZIP_FILE="$ZIP_FILE_PATH"
@@ -367,7 +378,8 @@ jobs:
             echo "Version:                $VERSION_STRING"
             echo "Attachment:             $ZIP_FILE"
             echo "Aggregated Files:       ${#FOUND_FILES[@]}"
-            echo "Description File:       ${README_FILE:-none}"
+            echo "Description File (EN):  ${README_FILE:-none}"
+            echo "Custom Field [german]:  ${README_DE_FILE:-none}"
             echo "New Screenshots:        ${#NEW_SCREENSHOTS[@]}"
             for s in "${NEW_SCREENSHOTS[@]}"; do
               echo "  + Screenshot:         $s"
@@ -501,13 +513,18 @@ jobs:
             done
           fi
 
-          # Step E: Update Resource Details (Description and/or Screenshots) via /api/resources/{id}/
+          # Step E: Update Resource Details (Description, custom_fields[german], and/or Screenshots) via /api/resources/{id}/
           RESOURCE_UPDATE_ARGS=()
 
           if [ -n "$README_FILE" ]; then
             echo ""
-            echo "Adding resource description from '$README_FILE' to resource update..."
+            echo "Adding primary resource description from '$README_FILE' to resource update..."
             RESOURCE_UPDATE_ARGS+=(-F "description=<${README_FILE}")
+          fi
+
+          if [ -n "$README_DE_FILE" ]; then
+            echo "Adding German resource description from '$README_DE_FILE' to custom_fields[german]..."
+            RESOURCE_UPDATE_ARGS+=(-F "custom_fields[german]=<${README_DE_FILE}")
           fi
 
           if [ "$NEW_UPLOAD_COUNT" -gt 0 ]; then
