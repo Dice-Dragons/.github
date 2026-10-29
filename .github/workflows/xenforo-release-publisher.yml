@@ -560,10 +560,11 @@ jobs:
             if [ -n "$DESCRIPTION" ]; then
               NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"[I]${DESCRIPTION}[/I]"
             fi
-            NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"[B]EN:[/B] A new version of [B]${ADDON_NAME}[/B] is now available for download."$'\n'"[B]DE:[/B] Eine neue Version von [B]${ADDON_NAME}[/B] steht ab sofort zum Download bereit."$'\n\n'"[HEADING=2]Changelog (${VERSION_STRING})[/HEADING]"$'\n\n'"[QUOTE]"$'\n'"${MESSAGE_CONTENT}"$'\n'"[/QUOTE]"$'\n\n'"[HEADING=2]Links & Download[/HEADING]"$'\n\n'"* [B]Download (Resource Manager):[/B] [URL='${FAQ_URL}']${ADDON_TITLE}[/URL]"
+            NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"[B]EN:[/B] A new version of [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] is now available for download in the [URL='${FAQ_URL}']Resource Manager[/URL]."$'\n'"[B]DE:[/B] Eine neue Version von [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] steht ab sofort im [URL='${FAQ_URL}']Ressourcen-Bereich[/URL] zum Download bereit."$'\n\n'"[HEADING=2]Changelog (${VERSION_STRING})[/HEADING]"$'\n\n'"[QUOTE]"$'\n'"${MESSAGE_CONTENT}"$'\n'"[/QUOTE]"$'\n\n'"[HEADING=2]Links & Download[/HEADING]"$'\n\n'"[LIST]"$'\n'"[*][B]Resource / Download:[/B] [URL='${FAQ_URL}']${ADDON_TITLE}[/URL]"
             if [ -n "$SUPPORT_URL" ]; then
-              NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n'"* [B]Support & Discussion / Hilfe & Diskussion:[/B] [URL='${SUPPORT_URL}']Support Forum[/URL]"
+              NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n'"[*][B]Support & Discussion / Hilfe & Diskussion:[/B] [URL='${SUPPORT_URL}']Support Forum[/URL]"
             fi
+            NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n'"[/LIST]"
 
             NEWS_RESP=$(curl -s -S -X POST "https://forum.dice-dragons.de/api/threads/" \
               -H "XF-Api-Key: ${XF_API_KEY}" \
