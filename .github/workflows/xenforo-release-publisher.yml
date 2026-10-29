@@ -164,7 +164,7 @@ jobs:
           if [ -z "$ADDON_NAME" ]; then
             ADDON_NAME="$ADDON_TITLE"
           fi
-          NEWS_TITLE="${ADDON_NAME} ${VERSION_STRING} veröffentlicht"
+          NEWS_TITLE="${ADDON_NAME} – Version ${VERSION_STRING}"
 
           # Check if news thread should be posted
           TAG_NAME="$INPUT_TAG"
@@ -285,8 +285,6 @@ jobs:
               MESSAGE_CONTENT=$(cat "./_docs/changelog.${VERSION_ID}.bbcode")
             elif [ -f "./_docs/changelog.${VERSION_STRING}.bbcode" ]; then
               MESSAGE_CONTENT=$(cat "./_docs/changelog.${VERSION_STRING}.bbcode")
-            elif [ -f "./_docs/info.de.bbcode" ]; then
-              MESSAGE_CONTENT=$(cat "./_docs/info.de.bbcode")
             else
               MESSAGE_CONTENT="A new update to version [B]${VERSION_STRING}[/B] is now available."
             fi
@@ -560,11 +558,11 @@ jobs:
 
             NEWS_MESSAGE="[HEADING=1]${ADDON_NAME} – Version ${VERSION_STRING}[/HEADING]"
             if [ -n "$DESCRIPTION" ]; then
-              NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"${DESCRIPTION}"
+              NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"[I]${DESCRIPTION}[/I]"
             fi
-            NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"Eine neue Version von [B]${ADDON_NAME}[/B] steht ab sofort zum Download bereit!"$'\n\n'"[HEADING=2]Was ist neu in Version ${VERSION_STRING}?[/HEADING]"$'\n\n'"[QUOTE]"$'\n'"${MESSAGE_CONTENT}"$'\n'"[/QUOTE]"$'\n\n'"[HEADING=2]Links & Download[/HEADING]"$'\n\n'"* [B]Download:[/B] [URL='${FAQ_URL}']Add-on im Ressourcen-Bereich herunterladen[/URL]"
+            NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"[B]EN:[/B] A new version of [B]${ADDON_NAME}[/B] is now available for download."$'\n'"[B]DE:[/B] Eine neue Version von [B]${ADDON_NAME}[/B] steht ab sofort zum Download bereit."$'\n\n'"[HEADING=2]Changelog (${VERSION_STRING})[/HEADING]"$'\n\n'"[QUOTE]"$'\n'"${MESSAGE_CONTENT}"$'\n'"[/QUOTE]"$'\n\n'"[HEADING=2]Links & Download[/HEADING]"$'\n\n'"* [B]Download (Resource Manager):[/B] [URL='${FAQ_URL}']${ADDON_TITLE}[/URL]"
             if [ -n "$SUPPORT_URL" ]; then
-              NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n'"* [B]Hilfe & Diskussion:[/B] [URL='${SUPPORT_URL}']Zum Support-Forum[/URL]"
+              NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n'"* [B]Support & Discussion / Hilfe & Diskussion:[/B] [URL='${SUPPORT_URL}']Support Forum[/URL]"
             fi
 
             NEWS_RESP=$(curl -s -S -X POST "https://forum.dice-dragons.de/api/threads/" \
