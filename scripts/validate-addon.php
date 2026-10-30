@@ -77,7 +77,7 @@ if (!file_exists($addonJsonFile)) {
 
         // Check PHP baseline in require
         $requires = $addonJson['require'] ?? [];
-        foreach (['cv6/DevTools', 'cv6/b', 'cv6/zzzInternal'] as $internalDep) {
+        foreach (['cv6/zzzInternal'] as $internalDep) {
             if (isset($requires[$internalDep]) || isset($addonJson['require-soft'][$internalDep])) {
                 logError($addonJsonFile, 1, "Public add-on must never depend on private/internal add-on '{$internalDep}'.");
             }

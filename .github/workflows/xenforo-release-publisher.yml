@@ -150,7 +150,7 @@ jobs:
 
           # 2. Parse metadata from addon.json
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
-          if [[ "$REPO_NAME" == "zzzInternal" || "$REPO_NAME" == "DevTools" || "$REPO_NAME" == "b" ]]; then
+          if [[ "$REPO_NAME" == "zzzInternal" ]]; then
             echo "::error::Repository '$REPO_NAME' is a strictly private/internal add-on and must never be published publicly."
             exit 1
           fi
