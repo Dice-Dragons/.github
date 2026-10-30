@@ -149,6 +149,11 @@ jobs:
           fi
 
           # 2. Parse metadata from addon.json
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [[ "$REPO_NAME" == "zzzInternal" || "$REPO_NAME" == "DevTools" || "$REPO_NAME" == "b" ]]; then
+            echo "::error::Repository '$REPO_NAME' is a strictly private/internal add-on and must never be published publicly."
+            exit 1
+          fi
           ADDON_TITLE=$(jq -r '.title // empty' "$ADDON_JSON" | tr -d '\r\n')
           VERSION_STRING=$(jq -r '.version_string // empty' "$ADDON_JSON" | tr -d '\r\n')
           VERSION_ID=$(jq -r '.version_id // empty' "$ADDON_JSON" | tr -d '\r\n')

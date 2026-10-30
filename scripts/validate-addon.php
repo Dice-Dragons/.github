@@ -77,6 +77,11 @@ if (!file_exists($addonJsonFile)) {
 
         // Check PHP baseline in require
         $requires = $addonJson['require'] ?? [];
+        foreach (['cv6/DevTools', 'cv6/b', 'cv6/zzzInternal'] as $internalDep) {
+            if (isset($requires[$internalDep]) || isset($addonJson['require-soft'][$internalDep])) {
+                logError($addonJsonFile, 1, "Public add-on must never depend on private/internal add-on '{$internalDep}'.");
+            }
+        }
         if (!isset($requires['php'])) {
             logWarning($addonJsonFile, 1, "addon.json does not specify an explicit 'php' requirement under 'require' (recommended: [\"8.2.0\", \"PHP 8.2.0+\"]).");
         } else {
