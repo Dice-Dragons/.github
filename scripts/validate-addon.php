@@ -251,6 +251,102 @@ foreach ($templateFiles as $file) {
 echo "  ✓ Scanned {$faScanned} templates for icon policy compliance.\n";
 
 // --------------------------------------------------------------------------
+// 4b. Non-FA Provider Icons Check in Code, Settings & _output/
+// --------------------------------------------------------------------------
+echo "\n🔍 Checking code, settings & _output/ for non-FA provider icons...\n";
+$nonFaPattern = '/\b(gi-[a-z0-9_-]+|gm-[a-z0-9_-]+|lu-[a-z0-9_-]+|gio|gmo|gmr|gms|gmf|luo|lul|lub)\b/';
+
+// 1. _output/admin_navigation/*.json
+$adminNavDir = $targetDir . DIRECTORY_SEPARATOR . '_output' . DIRECTORY_SEPARATOR . 'admin_navigation';
+if (is_dir($adminNavDir)) {
+    foreach (glob($adminNavDir . DIRECTORY_SEPARATOR . '*.json') ?: [] as $navFile) {
+        if (basename($navFile) === '_metadata.json') {
+            continue;
+        }
+        $data = json_decode((string)file_get_contents($navFile), true);
+        if (is_array($data) && !empty($data['icon']) && is_string($data['icon'])) {
+            $icon = trim($data['icon']);
+            if (!preg_match('/^(?:fa[sdrlb]?\s+)?fa-[a-z0-9-]+(?:\s+(?:fa[sdrlb]?|fa-[a-z0-9-]+))*$/', $icon)) {
+                logError($navFile, 1, "Invalid or non-FA icon '{$icon}' in admin_navigation. Only native FontAwesome 5.x icons ('fa-...') are permitted.");
+            }
+        }
+    }
+}
+
+// 2. _output/style_properties/*.json and _output/style_properties.less
+$stylePropDir = $targetDir . DIRECTORY_SEPARATOR . '_output' . DIRECTORY_SEPARATOR . 'style_properties';
+if (is_dir($stylePropDir)) {
+    foreach (glob($stylePropDir . DIRECTORY_SEPARATOR . '*.json') ?: [] as $spFile) {
+        if (basename($spFile) === '_metadata.json') {
+            continue;
+        }
+        $data = json_decode((string)file_get_contents($spFile), true);
+        if (is_array($data) && isset($data['property_value']) && is_string($data['property_value'])) {
+            $val = trim($data['property_value']);
+            if ($val !== '' && preg_match($nonFaPattern, $val, $m)) {
+                logError($spFile, 1, "Non-FA icon/style '{$m[1]}' in style property (value: '{$val}'). Only FontAwesome 5.x icons are allowed in releases.");
+            }
+        }
+    }
+}
+
+$spLessFile = $targetDir . DIRECTORY_SEPARATOR . '_output' . DIRECTORY_SEPARATOR . 'style_properties.less';
+if (file_exists($spLessFile)) {
+    $lines = explode("\n", (string)file_get_contents($spLessFile));
+    foreach ($lines as $idx => $line) {
+        if (preg_match($nonFaPattern, $line, $m)) {
+            logError($spLessFile, $idx + 1, "Non-FA icon/style '{$m[1]}' found in style_properties.less. Re-export style properties with FA 5.x icons only.");
+        }
+    }
+}
+
+// 3. _output/options/*.json
+$optionsDir = $targetDir . DIRECTORY_SEPARATOR . '_output' . DIRECTORY_SEPARATOR . 'options';
+if (is_dir($optionsDir)) {
+    foreach (glob($optionsDir . DIRECTORY_SEPARATOR . '*.json') ?: [] as $optFile) {
+        if (basename($optFile) === '_metadata.json') {
+            continue;
+        }
+        $data = json_decode((string)file_get_contents($optFile), true);
+        if (is_array($data) && isset($data['default_value']) && is_string($data['default_value'])) {
+            $val = trim($data['default_value']);
+            if ($val !== '' && preg_match($nonFaPattern, $val, $m)) {
+                logError($optFile, 1, "Non-FA icon/style '{$m[1]}' in option default_value ('{$val}'). Only FontAwesome 5.x icons are allowed.");
+            }
+        }
+    }
+}
+
+// 4. Templates, phrases, presets, and _data/*.xml (for non-Icons* add-ons)
+$repoFolder = basename((string)realpath($targetDir));
+$composerPkgName = is_array($composerJson ?? null) ? ($composerJson['name'] ?? '') : '';
+$isIconProviderAddon = str_starts_with($repoFolder, 'Icons') || str_starts_with($composerPkgName, 'dice-dragons/icons-');
+if (!$isIconProviderAddon) {
+    $scanDirs = [
+        $targetDir . DIRECTORY_SEPARATOR . '_output' . DIRECTORY_SEPARATOR . 'templates',
+        $targetDir . DIRECTORY_SEPARATOR . '_output' . DIRECTORY_SEPARATOR . 'phrases',
+        $targetDir . DIRECTORY_SEPARATOR . '_presets',
+        $targetDir . DIRECTORY_SEPARATOR . '_data',
+    ];
+    $prefixOnlyPattern = '/\b(gi-[a-z0-9_-]+|gm-[a-z0-9_-]+|lu-[a-z0-9_-]+)\b/';
+    foreach ($scanDirs as $scanDir) {
+        if (!is_dir($scanDir)) {
+            continue;
+        }
+        $files = findFiles($scanDir, '/\.(html|less|txt|json|xml)$/', []);
+        foreach ($files as $f) {
+            $lines = explode("\n", (string)file_get_contents($f));
+            foreach ($lines as $idx => $line) {
+                if (preg_match($prefixOnlyPattern, $line, $m)) {
+                    logError($f, $idx + 1, "Non-FA provider icon '{$m[1]}' found. Releases must exclusively use FontAwesome 5.x icons.");
+                }
+            }
+        }
+    }
+}
+echo "  ✓ Checked settings and files for non-FA provider icons.\n";
+
+// --------------------------------------------------------------------------
 // 5. XFCP Class Extension Validation
 // --------------------------------------------------------------------------
 echo "\n🔍 Checking XFCP class extensions...\n";
