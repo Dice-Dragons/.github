@@ -427,67 +427,6 @@ jobs:
           fi
 
           # 4. XenForo API Execution
-          # Step A: Upload ZIP attachment via /api/attachments/new-key
-          echo "Step 1: Creating attachment key and uploading file..."
-          ATTACH_RESP=$(curl -s -S -X POST "https://forum.dice-dragons.de/api/attachments/new-key" \
-            -H "XF-Api-Key: ${XF_API_KEY}" \
-            -H "XF-Api-User: ${XF_API_USER}" \
-            -H "X-XF-Api-Key: ${XF_API_KEY}" \
-            -H "X-XF-Api-User: ${XF_API_USER}" \
-            -F "api_key=${XF_API_KEY}" \
-            -F "api_user=${XF_API_USER}" \
-            -F "type=resource_version" \
-            -F "context[resource_id]=${RESOURCE_ID}" \
-            -F "attachment=@${ZIP_FILE}")
-
-          ATTACH_KEY=$(echo "$ATTACH_RESP" | jq -r '.key // empty')
-
-          # Step B: Create New Downloadable Resource Version
-          if [ -n "$ATTACH_KEY" ]; then
-            echo "Attachment uploaded successfully. Key: $ATTACH_KEY"
-            echo "Step 2: Creating new resource version via /api/resource-versions/..."
-            curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-versions/" \
-              -H "XF-Api-Key: ${XF_API_KEY}" \
-              -H "XF-Api-User: ${XF_API_USER}" \
-              -H "X-XF-Api-Key: ${XF_API_KEY}" \
-              -H "X-XF-Api-User: ${XF_API_USER}" \
-              -F "api_key=${XF_API_KEY}" \
-              -F "api_user=${XF_API_USER}" \
-              -F "resource_id=${RESOURCE_ID}" \
-              -F "version_string=${VERSION_STRING}" \
-              -F "version_type=local" \
-              -F "version_attachment_key=${ATTACH_KEY}"
-          else
-            echo "::warning::Attachment upload via new-key failed or key empty. Response: $ATTACH_RESP"
-            echo "Attempting direct POST fallback to /api/resource-versions/..."
-            curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-versions/" \
-              -H "XF-Api-Key: ${XF_API_KEY}" \
-              -H "XF-Api-User: ${XF_API_USER}" \
-              -H "X-XF-Api-Key: ${XF_API_KEY}" \
-              -H "X-XF-Api-User: ${XF_API_USER}" \
-              -F "api_key=${XF_API_KEY}" \
-              -F "api_user=${XF_API_USER}" \
-              -F "resource_id=${RESOURCE_ID}" \
-              -F "version_string=${VERSION_STRING}" \
-              -F "version_type=local" \
-              -F "attachment=@${ZIP_FILE}"
-          fi
-
-          echo ""
-          # Step C: Create Aggregated Changelog / Release Post Update
-          echo "Step 3: Posting aggregated changelog update post via /api/resource-updates/..."
-          curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-updates/" \
-            -H "XF-Api-Key: ${XF_API_KEY}" \
-            -H "XF-Api-User: ${XF_API_USER}" \
-            -H "X-XF-Api-Key: ${XF_API_KEY}" \
-            -H "X-XF-Api-User: ${XF_API_USER}" \
-            -F "api_key=${XF_API_KEY}" \
-            -F "api_user=${XF_API_USER}" \
-            -F "resource_id=${RESOURCE_ID}" \
-            -F "title=${TITLE}" \
-            -F "message=${MESSAGE_CONTENT}"
-
-          # Step D: Upload Newly Committed Screenshots via CustomFields API
           NEW_UPLOAD_COUNT=0
           FINAL_ATT_IDS=()
 
@@ -500,7 +439,74 @@ jobs:
           fi
           echo "Detected screenshot custom field name: '$SCREENSHOT_FIELD'"
 
-          if [ ${#NEW_SCREENSHOTS[@]} -gt 0 ]; then
+          if [ "$VERSION_ID" -le "$LAST_VERSION_ID" ] && [ "$LAST_VERSION_ID" -gt 0 ]; then
+            echo "Notice: Version '${VERSION_STRING}' (ID: ${VERSION_ID}) is already published on resource ${RESOURCE_ID} (Live ID: ${LAST_VERSION_ID})."
+            echo "Skipping Steps 1-4 (version upload, changelog update, screenshot upload) and Step 6 (news thread) — syncing resource metadata only."
+            SHOULD_POST_NEWS=false
+          else
+            # Step A: Upload ZIP attachment via /api/attachments/new-key
+            echo "Step 1: Creating attachment key and uploading file..."
+            ATTACH_RESP=$(curl -s -S -X POST "https://forum.dice-dragons.de/api/attachments/new-key" \
+              -H "XF-Api-Key: ${XF_API_KEY}" \
+              -H "XF-Api-User: ${XF_API_USER}" \
+              -H "X-XF-Api-Key: ${XF_API_KEY}" \
+              -H "X-XF-Api-User: ${XF_API_USER}" \
+              -F "api_key=${XF_API_KEY}" \
+              -F "api_user=${XF_API_USER}" \
+              -F "type=resource_version" \
+              -F "context[resource_id]=${RESOURCE_ID}" \
+              -F "attachment=@${ZIP_FILE}")
+
+            ATTACH_KEY=$(echo "$ATTACH_RESP" | jq -r '.key // empty')
+
+            # Step B: Create New Downloadable Resource Version
+            if [ -n "$ATTACH_KEY" ]; then
+              echo "Attachment uploaded successfully. Key: $ATTACH_KEY"
+              echo "Step 2: Creating new resource version via /api/resource-versions/..."
+              curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-versions/" \
+                -H "XF-Api-Key: ${XF_API_KEY}" \
+                -H "XF-Api-User: ${XF_API_USER}" \
+                -H "X-XF-Api-Key: ${XF_API_KEY}" \
+                -H "X-XF-Api-User: ${XF_API_USER}" \
+                -F "api_key=${XF_API_KEY}" \
+                -F "api_user=${XF_API_USER}" \
+                -F "resource_id=${RESOURCE_ID}" \
+                -F "version_string=${VERSION_STRING}" \
+                -F "version_type=local" \
+                -F "version_attachment_key=${ATTACH_KEY}"
+            else
+              echo "::warning::Attachment upload via new-key failed or key empty. Response: $ATTACH_RESP"
+              echo "Attempting direct POST fallback to /api/resource-versions/..."
+              curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-versions/" \
+                -H "XF-Api-Key: ${XF_API_KEY}" \
+                -H "XF-Api-User: ${XF_API_USER}" \
+                -H "X-XF-Api-Key: ${XF_API_KEY}" \
+                -H "X-XF-Api-User: ${XF_API_USER}" \
+                -F "api_key=${XF_API_KEY}" \
+                -F "api_user=${XF_API_USER}" \
+                -F "resource_id=${RESOURCE_ID}" \
+                -F "version_string=${VERSION_STRING}" \
+                -F "version_type=local" \
+                -F "attachment=@${ZIP_FILE}"
+            fi
+
+            echo ""
+            # Step C: Create Aggregated Changelog / Release Post Update
+            echo "Step 3: Posting aggregated changelog update post via /api/resource-updates/..."
+            curl -s -S -X POST "https://forum.dice-dragons.de/api/resource-updates/" \
+              -H "XF-Api-Key: ${XF_API_KEY}" \
+              -H "XF-Api-User: ${XF_API_USER}" \
+              -H "X-XF-Api-Key: ${XF_API_KEY}" \
+              -H "X-XF-Api-User: ${XF_API_USER}" \
+              -F "api_key=${XF_API_KEY}" \
+              -F "api_user=${XF_API_USER}" \
+              -F "resource_id=${RESOURCE_ID}" \
+              -F "title=${TITLE}" \
+              -F "message=${MESSAGE_CONTENT}"
+          fi
+
+          # Step D: Upload Newly Committed Screenshots via CustomFields API
+          if [ "$VERSION_ID" -gt "$LAST_VERSION_ID" ] && [ ${#NEW_SCREENSHOTS[@]} -gt 0 ]; then
             echo ""
             echo "Step 4: Uploading ${#NEW_SCREENSHOTS[@]} new/modified screenshot(s) for resource ${RESOURCE_ID}..."
 
@@ -555,18 +561,14 @@ jobs:
             RESOURCE_UPDATE_ARGS+=(-F "custom_fields[german]=<${README_DE_FILE}")
           fi
 
-          if echo "$RESOURCE_RESP" | jq -e '.resource.custom_fields | has("requirements")' >/dev/null 2>&1; then
-            if [ ${#REQUIRED_RESOURCE_IDS[@]} -gt 0 ]; then
-              echo "Adding ${#REQUIRED_RESOURCE_IDS[@]} required resource ID(s) (${REQUIRED_RESOURCE_IDS[*]}) to custom_fields[requirements]..."
-              for req_id in "${REQUIRED_RESOURCE_IDS[@]}"; do
-                RESOURCE_UPDATE_ARGS+=(-F "custom_fields[requirements][]=$req_id")
-              done
-            else
-              echo "Clearing custom_fields[requirements] (no add-on dependencies in composer.json)..."
-              RESOURCE_UPDATE_ARGS+=(-F "custom_fields[requirements]=")
-            fi
-          elif [ ${#REQUIRED_RESOURCE_IDS[@]} -gt 0 ]; then
-            echo "Notice: Resolved requirements (${REQUIRED_RESOURCE_IDS[*]}), but custom_fields[requirements] is not yet active on resource ${RESOURCE_ID}. Skipping until created on Prod."
+          if [ ${#REQUIRED_RESOURCE_IDS[@]} -gt 0 ]; then
+            echo "Adding ${#REQUIRED_RESOURCE_IDS[@]} required resource ID(s) (${REQUIRED_RESOURCE_IDS[*]}) to custom_fields[requirements]..."
+            for req_id in "${REQUIRED_RESOURCE_IDS[@]}"; do
+              RESOURCE_UPDATE_ARGS+=(-F "custom_fields[requirements][]=$req_id")
+            done
+          else
+            echo "Clearing custom_fields[requirements] (no add-on dependencies in composer.json)..."
+            RESOURCE_UPDATE_ARGS+=(-F "custom_fields[requirements]=")
           fi
 
           if [ "$NEW_UPLOAD_COUNT" -gt 0 ]; then
@@ -588,7 +590,7 @@ jobs:
               -F "api_user=${XF_API_USER}" \
               "${RESOURCE_UPDATE_ARGS[@]}")
 
-            if echo "$UPDATE_RES" | grep -q '"success":true'; then
+            if echo "$UPDATE_RES" | jq -e '.success == true' >/dev/null 2>&1; then
               echo "Resource ${RESOURCE_ID} updated successfully."
             else
               echo "::warning::Resource update response: $UPDATE_RES"
