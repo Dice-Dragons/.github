@@ -369,6 +369,30 @@ jobs:
             echo "SUCCESS: Found German resource description file for custom_fields[german]: '$README_DE_FILE' ($(wc -c < "$README_DE_FILE") bytes)"
           fi
 
+          # 3d. Resolve Required Add-on Resource IDs from composer.json (for custom_fields[requirements])
+          REQUIRED_RESOURCE_IDS=()
+          if [ -f "./composer.json" ]; then
+            while IFS= read -r repo_url; do
+              if [ -z "$repo_url" ]; then
+                continue
+              fi
+              dep_owner_repo=$(echo "$repo_url" | sed -E 's#^https?://github\.com/##; s#\.git$##; s#/$##')
+              if [ -n "$dep_owner_repo" ]; then
+                dep_addon_json=$(curl -s -f -L "https://raw.githubusercontent.com/${dep_owner_repo}/main/addon.json" 2>/dev/null || gh api "repos/${dep_owner_repo}/contents/addon.json" --jq '.content' 2>/dev/null | base64 -d 2>/dev/null || true)
+                if [ -n "$dep_addon_json" ]; then
+                  dep_faq_url=$(echo "$dep_addon_json" | jq -r '.faq_url // empty' 2>/dev/null | tr -d '\r\n')
+                  dep_res_id=$(echo "$dep_faq_url" | grep -oE '[0-9]+/?$' | tr -d '/' || true)
+                  if [ -n "$dep_res_id" ] && [[ "$dep_res_id" =~ ^[0-9]+$ ]]; then
+                    echo "SUCCESS: Resolved requirement '$dep_owner_repo' -> XFRM resource_id: $dep_res_id ($dep_faq_url)"
+                    REQUIRED_RESOURCE_IDS+=("$dep_res_id")
+                  else
+                    echo "Notice: Could not extract resource_id from faq_url ('$dep_faq_url') for '$dep_owner_repo'."
+                  fi
+                fi
+              fi
+            done < <(jq -r '.repositories[]?.url // empty' ./composer.json 2>/dev/null | tr -d '\r')
+          fi
+
           ZIP_FILE="$ZIP_FILE_PATH"
 
           # Dry Run Check
@@ -383,6 +407,7 @@ jobs:
             echo "Aggregated Files:       ${#FOUND_FILES[@]}"
             echo "Description File (EN):  ${README_FILE:-none}"
             echo "Custom Field [german]:  ${README_DE_FILE:-none}"
+            echo "Requirements IDs:       ${REQUIRED_RESOURCE_IDS[*]:-none}"
             echo "New Screenshots:        ${#NEW_SCREENSHOTS[@]}"
             for s in "${NEW_SCREENSHOTS[@]}"; do
               echo "  + Screenshot:         $s"
@@ -528,6 +553,20 @@ jobs:
           if [ -n "$README_DE_FILE" ]; then
             echo "Adding German resource description from '$README_DE_FILE' to custom_fields[german]..."
             RESOURCE_UPDATE_ARGS+=(-F "custom_fields[german]=<${README_DE_FILE}")
+          fi
+
+          if echo "$RESOURCE_RESP" | jq -e '.resource.custom_fields | has("requirements")' >/dev/null 2>&1; then
+            if [ ${#REQUIRED_RESOURCE_IDS[@]} -gt 0 ]; then
+              echo "Adding ${#REQUIRED_RESOURCE_IDS[@]} required resource ID(s) (${REQUIRED_RESOURCE_IDS[*]}) to custom_fields[requirements]..."
+              for req_id in "${REQUIRED_RESOURCE_IDS[@]}"; do
+                RESOURCE_UPDATE_ARGS+=(-F "custom_fields[requirements][]=$req_id")
+              done
+            else
+              echo "Clearing custom_fields[requirements] (no add-on dependencies in composer.json)..."
+              RESOURCE_UPDATE_ARGS+=(-F "custom_fields[requirements]=")
+            fi
+          elif [ ${#REQUIRED_RESOURCE_IDS[@]} -gt 0 ]; then
+            echo "Notice: Resolved requirements (${REQUIRED_RESOURCE_IDS[*]}), but custom_fields[requirements] is not yet active on resource ${RESOURCE_ID}. Skipping until created on Prod."
           fi
 
           if [ "$NEW_UPLOAD_COUNT" -gt 0 ]; then
