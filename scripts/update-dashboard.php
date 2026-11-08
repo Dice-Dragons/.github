@@ -250,7 +250,7 @@ $rpgTable .= "| :--- | :--- | :--- | :--- | :--- |\n";
 
 foreach ($rpgCatalog as $item) {
     $meta = $allAddonMeta[$item['repo']] ?? (isset($item['alt_repo']) ? ($allAddonMeta[$item['alt_repo']] ?? null) : null);
-    $title = $meta['title'] ?? $item['default_title'];
+    $title = $item['default_title'];
     $ver = $meta['version'] ?? '1.0.0 Beta 1';
     $rpgTable .= "| **{$item['role']}** | **{$title}** | `{$item['addon_id']}` | `{$ver}` | {$item['desc']} |\n";
 }

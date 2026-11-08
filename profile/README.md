@@ -18,7 +18,7 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | **Kern-Modul** | **[DD] Character Database** | `cv6/CharEdit` | `1.2.0 Release Candidate 4` | Charakterbögen, Settings, Archetypen, Fähigkeiten, Zauber & Kampagnen |
 | **Kern-Modul** | **[DD] Dice Roller** | `cv6/DiceRoller` | `2.8.1` | Würfel-Engine, Regel-Pipelines, Wiresets, visuelle Würfel-Sets & Charakterbogen-Würfeltrigger |
 | **Kern-Modul** | **[DD] BattleMap Generator** | `cv6/BattleMaps` | `1.0.0 Beta 1` | Prozeduraler Dungeon- & Gebäude-Generator, interaktiver Viewer & Karten-Galerie |
-| **Kern-Modul** | **[DD] RPG Tools** | `cv6/Handout` | `1.1.0` | In-Game-Briefe, Pergamente & geteilte Kampagnen-Handouts |
+| **Kern-Modul** | **[DD] Handout Generator** | `cv6/Handout` | `1.1.0` | In-Game-Briefe, Pergamente & geteilte Kampagnen-Handouts |
 | **Empfohlene Erweiterung** | **[DD] Font Manager** | `cv6/FontManager` | `1.0.0 Release Candidate 2` | Web- & RPG-Schriftarten für Handout-Layouts, Charakterbögen & Würfel-Sets |
 | **Empfohlene Erweiterung** | **[DD] Timeline** | `cv6/Timeline` | `1.0.1` | Interaktive Zeitleisten & Chroniken für RPG-Kampagnen und Spielwelten |
 | **Empfohlene Erweiterung** | **[DD] Prefix Tools** | `cv6/Prefix` | `1.3.7` | Gestylte Badges & Präfix-Verwaltung für RPG-Setting-Editionen |
