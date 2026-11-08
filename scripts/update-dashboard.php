@@ -37,7 +37,9 @@ $excludeRepos = [
     '.github',
     'Settings',
     'Vorgify',
-    'DevTools',
+    'zzzInternal',
+    'cv6-AI-Skills',
+    'XenForo-AI-Skills',
     'BookList',
     'demo-repository',
 ];
