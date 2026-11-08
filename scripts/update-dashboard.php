@@ -7,21 +7,22 @@ declare(strict_types=1);
  *
  * Scans all repositories in the Dice-Dragons organization via GitHub REST API (curl),
  * extracts metadata from published releases and addon.json, and regenerates
- * profile/README.md (including the [DD] RPG Suite ecosystem overview).
+ * profile/README.md (English default) and profile/README.de.md (German).
  *
  * 100% native PHP (cURL) - Zero shell/exec dependencies.
  * Works both locally and inside GitHub Actions.
  */
 
 $rootDir = dirname(__DIR__);
-$readmeFile = $rootDir . DIRECTORY_SEPARATOR . 'profile' . DIRECTORY_SEPARATOR . 'README.md';
+$readmeFileEn = $rootDir . DIRECTORY_SEPARATOR . 'profile' . DIRECTORY_SEPARATOR . 'README.md';
+$readmeFileDe = $rootDir . DIRECTORY_SEPARATOR . 'profile' . DIRECTORY_SEPARATOR . 'README.de.md';
 
 $token = getenv('GH_TOKEN') ?: getenv('GITHUB_TOKEN') ?: null;
 
 echo "=====================================================\n";
 echo " Dice & Dragons - Organization Dashboard Generator\n";
-echo " Target: {$readmeFile}\n";
-echo " Auth:   " . ($token ? "Token provided (Authenticated)" : "Anonymous (subject to rate limits)") . "\n";
+echo " Targets: {$readmeFileEn} & {$readmeFileDe}\n";
+echo " Auth:    " . ($token ? "Token provided (Authenticated)" : "Anonymous (subject to rate limits)") . "\n";
 echo "=====================================================\n\n";
 
 // 1. Fetch repositories from organization Dice-Dragons
@@ -156,107 +157,182 @@ usort($rows, function ($a, $b) {
 $count = count($rows);
 echo "\nTotal dashboard add-ons: {$count}\n";
 
-$table = "| Add-on | Version | Abhängigkeiten | Support |\n";
-$table .= "| :--- | :--- | :--- | :--- |\n";
+$tableEn = "| Add-on | Version | Dependencies | Support |\n";
+$tableEn .= "| :--- | :--- | :--- | :--- |\n";
+
+$tableDe = "| Add-on | Version | Abhängigkeiten | Support |\n";
+$tableDe .= "| :--- | :--- | :--- | :--- |\n";
+
 foreach ($rows as $row) {
     $link = $row['support'] !== '' ? "[Forum]({$row['support']})" : '-';
-    $table .= "| **{$row['title']}** | `{$row['version']}` | `{$row['deps']}` | {$link} |\n";
+    $line = "| **{$row['title']}** | `{$row['version']}` | `{$row['deps']}` | {$link} |\n";
+    $tableEn .= $line;
+    $tableDe .= $line;
 }
 
-// Build RPG Suite Ecosystem Table
+// Build RPG Suite Ecosystem Tables (EN & DE)
 $rpgCatalog = [
     [
         'repo' => 'Core',
         'default_title' => '[DD] - Core Library',
         'addon_id' => 'cv6/Core',
-        'role' => 'Basis & Infrastruktur',
-        'desc' => 'Gemeinsame UI-Komponenten, Icon-Picker, Vergleichsoperatoren & Basis-Helper',
+        'role_en' => 'Foundation',
+        'role_de' => 'Basis & Infrastruktur',
+        'desc_en' => 'Shared UI components, icon chooser, operators, and base helpers',
+        'desc_de' => 'Gemeinsame UI-Komponenten, Icon-Picker, Vergleichsoperatoren & Basis-Helper',
     ],
     [
         'repo' => 'RPG',
         'default_title' => '[DD] RPG Suite',
         'addon_id' => 'cv6/RPG',
-        'role' => 'Basis & Infrastruktur',
-        'desc' => 'Zentrale Genres, Verlage (Publishers), Kampagnen-Content-Bridge & RPG-Dashboard',
+        'role_en' => 'Foundation',
+        'role_de' => 'Basis & Infrastruktur',
+        'desc_en' => 'Central genres, publishers, campaign content bridge, and RPG dashboard',
+        'desc_de' => 'Zentrale Genres, Verlage (Publishers), Kampagnen-Content-Bridge & RPG-Dashboard',
     ],
     [
         'repo' => 'CustomFields',
         'default_title' => '[DD] Custom Fields Extension',
         'addon_id' => 'cv6/CustomFields',
-        'role' => 'Basis & Infrastruktur',
-        'desc' => 'Erweiterte Zusatzfelder, Formel-Berechnungen, Feld-Abhängigkeiten & EntityChooser',
+        'role_en' => 'Foundation',
+        'role_de' => 'Basis & Infrastruktur',
+        'desc_en' => 'Extended custom field types, calculations, dependencies, and EntityChooser',
+        'desc_de' => 'Erweiterte Zusatzfelder, Formel-Berechnungen, Feld-Abhängigkeiten & EntityChooser',
     ],
     [
         'repo' => 'CharEdit',
         'default_title' => '[DD] Character Database',
         'addon_id' => 'cv6/CharEdit',
-        'role' => 'Kern-Modul',
-        'desc' => 'Charakterbögen, Settings, Archetypen, Fähigkeiten, Zauber & Kampagnen',
+        'role_en' => 'Core Module',
+        'role_de' => 'Kern-Modul',
+        'desc_en' => 'Character sheets, settings, archetypes, abilities, spells, and campaigns',
+        'desc_de' => 'Charakterbögen, Settings, Archetypen, Fähigkeiten, Zauber & Kampagnen',
     ],
     [
         'repo' => 'DiceRoller',
         'default_title' => '[DD] Dice Roller',
         'addon_id' => 'cv6/DiceRoller',
-        'role' => 'Kern-Modul',
-        'desc' => 'Würfel-Engine, Regel-Pipelines, Wiresets, visuelle Würfel-Sets & Charakterbogen-Würfeltrigger',
+        'role_en' => 'Core Module',
+        'role_de' => 'Kern-Modul',
+        'desc_en' => 'Dice rolling engine, rule pipelines, wiresets, visual dice sets, and character sheet roll triggers',
+        'desc_de' => 'Würfel-Engine, Regel-Pipelines, Wiresets, visuelle Würfel-Sets & Charakterbogen-Würfeltrigger',
     ],
     [
         'repo' => 'BattleMaps',
         'default_title' => '[DD] BattleMap Generator',
         'addon_id' => 'cv6/BattleMaps',
-        'role' => 'Kern-Modul',
-        'desc' => 'Prozeduraler Dungeon- & Gebäude-Generator, interaktiver Viewer & Karten-Galerie',
+        'role_en' => 'Core Module',
+        'role_de' => 'Kern-Modul',
+        'desc_en' => 'Procedural dungeon & building generator, interactive viewer, and map gallery',
+        'desc_de' => 'Prozeduraler Dungeon- & Gebäude-Generator, interaktiver Viewer & Karten-Galerie',
     ],
     [
         'repo' => 'Handout',
         'default_title' => '[DD] Handout Generator',
         'addon_id' => 'cv6/Handout',
-        'role' => 'Kern-Modul',
-        'desc' => 'In-Game-Briefe, Pergamente & geteilte Kampagnen-Handouts',
+        'role_en' => 'Core Module',
+        'role_de' => 'Kern-Modul',
+        'desc_en' => 'In-game letters, parchments, and shared campaign handouts',
+        'desc_de' => 'In-Game-Briefe, Pergamente & geteilte Kampagnen-Handouts',
     ],
     [
         'repo' => 'FontManager',
         'default_title' => '[DD] Font Manager',
         'addon_id' => 'cv6/FontManager',
-        'role' => 'Empfohlene Erweiterung',
-        'desc' => 'Web- & RPG-Schriftarten für Handout-Layouts, Charakterbögen & Würfel-Sets',
+        'role_en' => 'Recommended Add-on',
+        'role_de' => 'Empfohlene Erweiterung',
+        'desc_en' => 'Custom web & RPG fonts for handout layouts, character sheets, and dice sets',
+        'desc_de' => 'Web- & RPG-Schriftarten für Handout-Layouts, Charakterbögen & Würfel-Sets',
     ],
     [
         'repo' => 'TimeLine',
         'alt_repo' => 'Timeline',
         'default_title' => '[DD] Timeline',
         'addon_id' => 'cv6/Timeline',
-        'role' => 'Empfohlene Erweiterung',
-        'desc' => 'Interaktive Zeitleisten & Chroniken für RPG-Kampagnen und Spielwelten',
+        'role_en' => 'Recommended Add-on',
+        'role_de' => 'Empfohlene Erweiterung',
+        'desc_en' => 'Interactive timelines and chronicles for RPG campaigns and worlds',
+        'desc_de' => 'Interaktive Zeitleisten & Chroniken für RPG-Kampagnen und Spielwelten',
     ],
     [
         'repo' => 'Prefix',
         'default_title' => '[DD] Prefix Tools',
         'addon_id' => 'cv6/Prefix',
-        'role' => 'Empfohlene Erweiterung',
-        'desc' => 'Gestylte Badges & Präfix-Verwaltung für RPG-Setting-Editionen',
+        'role_en' => 'Recommended Add-on',
+        'role_de' => 'Empfohlene Erweiterung',
+        'desc_en' => 'Styled badges and prefix management for RPG setting editions',
+        'desc_de' => 'Gestylte Badges & Präfix-Verwaltung für RPG-Setting-Editionen',
     ],
     [
         'repo' => 'IconsGame',
         'default_title' => '[DD] Icon Interface: Game-Icons.net',
         'addon_id' => 'cv6/IconsGame',
-        'role' => 'Empfohlene Erweiterung',
-        'desc' => 'Über 4.000 Tabletop-RPG-Icons von Game-Icons.net für Genres, Fertigkeiten & Würfel',
+        'role_en' => 'Recommended Add-on',
+        'role_de' => 'Empfohlene Erweiterung',
+        'desc_en' => 'Over 4,000 tabletop RPG icons from Game-Icons.net for genres, skills, and dice',
+        'desc_de' => 'Über 4.000 Tabletop-RPG-Icons von Game-Icons.net für Genres, Fertigkeiten & Würfel',
     ],
 ];
 
-$rpgTable = "| Bereich | Add-on | ID | Version | Funktion innerhalb der RPG Suite |\n";
-$rpgTable .= "| :--- | :--- | :--- | :--- | :--- |\n";
+$rpgTableEn = "| Tier | Add-on | ID | Version | Role in the RPG Suite |\n";
+$rpgTableEn .= "| :--- | :--- | :--- | :--- | :--- |\n";
+
+$rpgTableDe = "| Bereich | Add-on | ID | Version | Funktion innerhalb der RPG Suite |\n";
+$rpgTableDe .= "| :--- | :--- | :--- | :--- | :--- |\n";
 
 foreach ($rpgCatalog as $item) {
     $meta = $allAddonMeta[$item['repo']] ?? (isset($item['alt_repo']) ? ($allAddonMeta[$item['alt_repo']] ?? null) : null);
     $title = $item['default_title'];
     $ver = $meta['version'] ?? '1.0.0 Beta 1';
-    $rpgTable .= "| **{$item['role']}** | **{$title}** | `{$item['addon_id']}` | `{$ver}` | {$item['desc']} |\n";
+    $rpgTableEn .= "| **{$item['role_en']}** | **{$title}** | `{$item['addon_id']}` | `{$ver}` | {$item['desc_en']} |\n";
+    $rpgTableDe .= "| **{$item['role_de']}** | **{$title}** | `{$item['addon_id']}` | `{$ver}` | {$item['desc_de']} |\n";
 }
 
-$readme = <<<MD
+$readmeEn = <<<MD
 # Dice & Dragons — XenForo 2.3+ Add-on Suite
+*This overview is also available in: [Deutsch](https://github.com/Dice-Dragons/.github/blob/main/profile/README.de.md)*
+
+Welcome to the official GitHub organization profile of **Dice & Dragons**!
+
+This organization hosts and maintains the official XenForo 2.3+ add-on suite developed by [Hoffi](https://forum.dice-dragons.de/mitglieder/hoffi.1/), built and deployed via automated CI/CD pipelines.
+
+---
+
+## 🎲 [DD] RPG Suite — Ecosystem & Modules
+
+**[DD] RPG Suite (`cv6/RPG`)** is the central domain platform for tabletop & pen-and-paper roleplaying games in XenForo 2.3 (genres, publishers, campaign content bridge, and RPG dashboard), connecting all specialized RPG modules across the suite:
+
+{$rpgTableEn}
+
+---
+
+## 📊 Live Suite Dashboard
+
+Overview of all {$count} active add-ons in the suite:
+
+{$tableEn}
+
+---
+
+## ⚙️ Technical Standards
+
+* **Framework**: XenForo 2.3.0+
+* **PHP Baseline**: PHP 8.2.0+ (optimized for PHP 8.4)
+* **Frontend**: Vanilla JS (ES2020), LESS, FontAwesome 5.x Baseline
+* **License**: Proprietary (for holders of a valid XenForo license)
+
+---
+
+## 💬 Community & Support
+
+* 🌐 **Main Forum**: [https://forum.dice-dragons.de](https://forum.dice-dragons.de)
+* 📥 **Downloads & Resources**: [https://forum.dice-dragons.de/downloads/](https://forum.dice-dragons.de/downloads/)
+* 👤 **Developer Profile**: [Hoffi on Dice & Dragons](https://forum.dice-dragons.de/mitglieder/hoffi.1/) | [Hoffi on XenForo.com](https://xenforo.com/community/members/hoffi.214/)
+MD;
+
+$readmeDe = <<<MD
+# Dice & Dragons — XenForo 2.3+ Add-on Suite
+*Diese Übersicht ist auch verfügbar auf: [English](https://github.com/Dice-Dragons)*
 
 Herzlich willkommen im GitHub-Organisationsprofil von **Dice & Dragons**!
 
@@ -268,7 +344,7 @@ Hier werden die offiziellen XenForo 2.3+ Add-ons von [Hoffi](https://forum.dice-
 
 Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- & Pen-&-Paper-Rollenspiele in XenForo 2.3 (Genres, Verlage, Kampagnen-Content-Bridge und RPG-Dashboard) und verbindet alle spezialisierten Rollenspiel-Module der Suite:
 
-{$rpgTable}
+{$rpgTableDe}
 
 ---
 
@@ -276,7 +352,7 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 
 Übersicht aller {$count} aktiven Add-ons der Suite:
 
-{$table}
+{$tableDe}
 
 ---
 
@@ -296,12 +372,13 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 * 👤 **Entwickler-Profil**: [Hoffi auf Dice & Dragons](https://forum.dice-dragons.de/mitglieder/hoffi.1/) | [Hoffi auf XenForo.com](https://xenforo.com/community/members/hoffi.214/)
 MD;
 
-if (!is_dir(dirname($readmeFile))) {
-    mkdir(dirname($readmeFile), 0777, true);
+if (!is_dir(dirname($readmeFileEn))) {
+    mkdir(dirname($readmeFileEn), 0777, true);
 }
 
-file_put_contents($readmeFile, $readme);
-echo "✅ Successfully written {$count} add-ons to {$readmeFile}!\n";
+file_put_contents($readmeFileEn, $readmeEn);
+file_put_contents($readmeFileDe, $readmeDe);
+echo "✅ Successfully written {$count} add-ons to {$readmeFileEn} and {$readmeFileDe}!\n";
 
 // ==========================================================================
 // Native PHP cURL Functions

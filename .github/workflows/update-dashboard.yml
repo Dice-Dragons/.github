@@ -33,8 +33,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain profile/README.md)" ]; then
-            git add profile/README.md
+          if [ -n "$(git status --porcelain profile/README.md profile/README.de.md)" ]; then
+            git add profile/README.md profile/README.de.md
             git commit -m "chore: update organization suite dashboard [skip ci]"
             git push origin main
             echo "Dashboard successfully updated and pushed."
