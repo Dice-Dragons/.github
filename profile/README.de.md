@@ -17,9 +17,9 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | **Basis & Infrastruktur** | **[DD] RPG Suite** | `cv6/RPG` | `1.0.0 Beta 1` | Zentrale Genres, Verlage (Publishers), Kampagnen-Content-Bridge & RPG-Dashboard |
 | **Basis & Infrastruktur** | **[DD] Custom Fields Extension** | `cv6/CustomFields` | `1.9.0 Release Candidate 1` | Erweiterte Zusatzfelder, Formel-Berechnungen, Feld-Abhängigkeiten & EntityChooser |
 | **Kern-Modul** | **[DD] Character Database** | `cv6/CharEdit` | `1.2.0 Release Candidate 4` | Charakterbögen, Settings, Archetypen, Fähigkeiten, Zauber & Kampagnen |
-| **Kern-Modul** | **[DD] Dice Roller** | `cv6/DiceRoller` | `2.8.1` | Würfel-Engine, Regel-Pipelines, Wiresets, visuelle Würfel-Sets & Charakterbogen-Würfeltrigger |
+| **Kern-Modul** | **[DD] Dice Roller** | `cv6/DiceRoller` | `3.0.0 Beta 1` | Würfel-Engine, Regel-Pipelines, Wiresets, visuelle Würfel-Sets & Charakterbogen-Würfeltrigger |
 | **Kern-Modul** | **[DD] BattleMap Generator** | `cv6/BattleMaps` | `1.0.0 Beta 1` | Prozeduraler Dungeon- & Gebäude-Generator, interaktiver Viewer & Karten-Galerie |
-| **Kern-Modul** | **[DD] Handout Generator** | `cv6/Handout` | `1.1.0` | In-Game-Briefe, Pergamente & geteilte Kampagnen-Handouts |
+| **Kern-Modul** | **[DD] Handout Generator** | `cv6/Handout` | `2.0.0 Beta 1` | In-Game-Briefe, Pergamente & geteilte Kampagnen-Handouts |
 | **Empfohlene Erweiterung** | **[DD] Font Manager** | `cv6/FontManager` | `1.0.0 Release Candidate 2` | Web- & RPG-Schriftarten für Handout-Layouts, Charakterbögen & Würfel-Sets |
 | **Empfohlene Erweiterung** | **[DD] Timeline** | `cv6/Timeline` | `1.0.1` | Interaktive Zeitleisten & Chroniken für RPG-Kampagnen und Spielwelten |
 | **Empfohlene Erweiterung** | **[DD] Prefix Tools** | `cv6/Prefix` | `1.3.7` | Gestylte Badges & Präfix-Verwaltung für RPG-Setting-Editionen |
@@ -35,13 +35,13 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | Add-on | Version | Abhängigkeiten | Support |
 | :--- | :--- | :--- | :--- |
 | **[DD] - Core Library** | `1.6.3` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
-| **[DD] RPG Suite** | `1.0.0 Beta 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/) |
+| **[DD] RPG Suite** | `1.0.0 Beta 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
 | **[DD] Admin Tools** | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
 | **[DD] Avatar Style Chooser** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
 | **[DD] Bump** | `1.0.0` | `-` | [Forum](https://forum.dice-dragons.de/forum/bump/) |
 | **[DD] Character Database** | `1.2.0 Release Candidate 4` | `^1.6.3 + CustomFields, RPG` | [Forum](https://forum.dice-dragons.de/forum/character/) |
 | **[DD] Custom Fields Extension** | `1.9.0 Release Candidate 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
-| **[DD] Dice Roller** | `2.8.1` | `^1.6.1` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
+| **[DD] Dice Roller** | `3.0.0 Beta 1` | `^1.6.3 + RPG` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
 | **[DD] Discord Hook Enhancements** | `1.0.0` | `-` | - |
 | **[DD] Font Manager** | `1.0.0 Release Candidate 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/font-manager/) |
 | **[DD] Icon Interface: Game-Icons.net** | `1.0.0 Beta 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
