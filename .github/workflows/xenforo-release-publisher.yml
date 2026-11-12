@@ -295,6 +295,9 @@ jobs:
             fi
           fi
 
+          # Strip internal numeric version IDs in parentheses, e.g. "(ID 1030770)", "(ID: 1060370)", "(1030770)"
+          MESSAGE_CONTENT=$(echo "$MESSAGE_CONTENT" | sed -E 's/[[:space:]]*\((ID:?[[:space:]]*)?(\[ICODE\])?[0-9]{7}(\[\/ICODE\])?\)//gi')
+
           # 3b. Detect newly committed/modified screenshots since last release tag
           NEW_SCREENSHOTS=()
           git fetch --tags --force 2>/dev/null || true
