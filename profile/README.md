@@ -22,7 +22,7 @@ This organization hosts and maintains the official XenForo 2.3+ add-on suite dev
 | **Core Module** | **[DD] Handout Generator** | `cv6/Handout` | `2.0.0 Beta 1` | In-game letters, parchments, and shared campaign handouts |
 | **Recommended Add-on** | **[DD] Font Manager** | `cv6/FontManager` | `1.0.0 Release Candidate 2` | Custom web & RPG fonts for handout layouts, character sheets, and dice sets |
 | **Recommended Add-on** | **[DD] Timeline** | `cv6/Timeline` | `1.0.1` | Interactive timelines and chronicles for RPG campaigns and worlds |
-| **Recommended Add-on** | **[DD] Prefix Tools** | `cv6/Prefix` | `1.3.7` | Styled badges and prefix management for RPG setting editions |
+| **Recommended Add-on** | **[DD] Prefix Tools** | `cv6/Prefix` | `1.3.8` | Styled badges and prefix management for RPG setting editions |
 | **Recommended Add-on** | **[DD] Icon Interface: Game-Icons.net** | `cv6/IconsGame` | `1.0.0 Beta 2` | Over 4,000 tabletop RPG icons from Game-Icons.net for genres, skills, and dice |
 
 
@@ -53,8 +53,8 @@ Overview of all 22 active add-ons in the suite:
 | **[DD] Node Icons & Tools** | `1.5.12` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/node-icon/) |
 | **[DD] Notebook** | `1.1.0 Release Candidate 1` | `^1.4.2` | - |
 | **[DD] Notice Countdown** | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
-| **[DD] Prefix Tools** | `1.3.7` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
-| **[DD] Resource Gallery** | `1.1.0 Release Candidate 1` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
+| **[DD] Prefix Tools** | `1.3.8` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
+| **[DD] Resource Gallery** | `1.1.0 Release Candidate 2` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
 | **[DD] Timeline** | `1.0.1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/) |
 
 

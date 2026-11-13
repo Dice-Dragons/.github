@@ -22,7 +22,7 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | **Kern-Modul** | **[DD] Handout Generator** | `cv6/Handout` | `2.0.0 Beta 1` | In-Game-Briefe, Pergamente & geteilte Kampagnen-Handouts |
 | **Empfohlene Erweiterung** | **[DD] Font Manager** | `cv6/FontManager` | `1.0.0 Release Candidate 2` | Web- & RPG-Schriftarten für Handout-Layouts, Charakterbögen & Würfel-Sets |
 | **Empfohlene Erweiterung** | **[DD] Timeline** | `cv6/Timeline` | `1.0.1` | Interaktive Zeitleisten & Chroniken für RPG-Kampagnen und Spielwelten |
-| **Empfohlene Erweiterung** | **[DD] Prefix Tools** | `cv6/Prefix` | `1.3.7` | Gestylte Badges & Präfix-Verwaltung für RPG-Setting-Editionen |
+| **Empfohlene Erweiterung** | **[DD] Prefix Tools** | `cv6/Prefix` | `1.3.8` | Gestylte Badges & Präfix-Verwaltung für RPG-Setting-Editionen |
 | **Empfohlene Erweiterung** | **[DD] Icon Interface: Game-Icons.net** | `cv6/IconsGame` | `1.0.0 Beta 2` | Über 4.000 Tabletop-RPG-Icons von Game-Icons.net für Genres, Fertigkeiten & Würfel |
 
 
@@ -53,8 +53,8 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | **[DD] Node Icons & Tools** | `1.5.12` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/node-icon/) |
 | **[DD] Notebook** | `1.1.0 Release Candidate 1` | `^1.4.2` | - |
 | **[DD] Notice Countdown** | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
-| **[DD] Prefix Tools** | `1.3.7` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
-| **[DD] Resource Gallery** | `1.1.0 Release Candidate 1` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
+| **[DD] Prefix Tools** | `1.3.8` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
+| **[DD] Resource Gallery** | `1.1.0 Release Candidate 2` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
 | **[DD] Timeline** | `1.0.1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/) |
 
 
