@@ -16,7 +16,7 @@ This organization hosts and maintains the official XenForo 2.3+ add-on suite dev
 | **Foundation** | **[DD] - Core Library** | `cv6/Core` | `1.6.3` | Shared UI components, icon chooser, operators, and base helpers |
 | **Foundation** | **[DD] RPG Suite** | `cv6/RPG` | `1.0.0 Beta 1` | Central genres, publishers, campaign content bridge, and RPG dashboard |
 | **Foundation** | **[DD] Custom Fields Extension** | `cv6/CustomFields` | `1.9.0 Release Candidate 1` | Extended custom field types, calculations, dependencies, and EntityChooser |
-| **Core Module** | **[DD] Character Database** | `cv6/CharEdit` | `1.2.0 Release Candidate 4` | Character sheets, settings, archetypes, abilities, spells, and campaigns |
+| **Core Module** | **[DD] Character Database** | `cv6/CharEdit` | `1.2.0 Release Candidate 5` | Character sheets, settings, archetypes, abilities, spells, and campaigns |
 | **Core Module** | **[DD] Dice Roller** | `cv6/DiceRoller` | `3.0.0 Beta 1` | Dice rolling engine, rule pipelines, wiresets, visual dice sets, and character sheet roll triggers |
 | **Core Module** | **[DD] BattleMap Generator** | `cv6/BattleMaps` | `1.0.0 Beta 1` | Procedural dungeon & building generator, interactive viewer, and map gallery |
 | **Core Module** | **[DD] Handout Generator** | `cv6/Handout` | `2.0.0 Beta 1` | In-game letters, parchments, and shared campaign handouts |
@@ -39,7 +39,7 @@ Overview of all 22 active add-ons in the suite:
 | **[DD] Admin Tools** | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
 | **[DD] Avatar Style Chooser** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
 | **[DD] Bump** | `1.0.0` | `-` | [Forum](https://forum.dice-dragons.de/forum/bump/) |
-| **[DD] Character Database** | `1.2.0 Release Candidate 4` | `^1.6.3 + CustomFields, RPG` | [Forum](https://forum.dice-dragons.de/forum/character/) |
+| **[DD] Character Database** | `1.2.0 Release Candidate 5` | `^1.6.3 + CustomFields, RPG` | [Forum](https://forum.dice-dragons.de/forum/character/) |
 | **[DD] Custom Fields Extension** | `1.9.0 Release Candidate 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
 | **[DD] Dice Roller** | `3.0.0 Beta 1` | `^1.6.3 + RPG` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
 | **[DD] Discord Hook Enhancements** | `1.0.0` | `-` | - |
