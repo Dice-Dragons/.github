@@ -162,6 +162,28 @@ jobs:
           SUPPORT_URL=$(jq -r '.support_url // empty' "$ADDON_JSON" | tr -d '\r\n')
           RESOURCE_ID=$(echo "$FAQ_URL" | grep -oE '[0-9]+/?$' | tr -d '/')
 
+          # Parse dd-tier from composer.json (with repository name fallback)
+          DD_TIER=""
+          if [ -f "./composer.json" ]; then
+            DD_TIER=$(jq -r '.extra["dd-tier"] // empty' "./composer.json" 2>/dev/null | tr -d '\r\n')
+          fi
+          if [ -z "$DD_TIER" ]; then
+            case "$REPO_NAME" in
+              EasyWidgets|UserSelfDelete|AvatarStyles|ResourceGallery)
+                DD_TIER="premium"
+                ;;
+              RPG|DiceRoller|Handout)
+                DD_TIER="rpg-suite"
+                ;;
+              BattleMaps|CharEdit)
+                DD_TIER="rpg-suite-plus"
+                ;;
+              *)
+                DD_TIER="free"
+                ;;
+            esac
+          fi
+
           TITLE="Version ${VERSION_STRING}"
 
           # Extract clean addon name without [DD] prefix for news title
@@ -254,6 +276,7 @@ jobs:
           echo "Parsed VERSION_ID:     '$VERSION_ID'"
           echo "Parsed VERSION_STRING: '$VERSION_STRING'"
           echo "Parsed RESOURCE_ID:    '$RESOURCE_ID'"
+          echo "Parsed DD_TIER:        '$DD_TIER'"
           echo "Live LAST_VERSION_ID:  '$LAST_VERSION_ID'"
           echo "API Live Version Str:  '$API_VER_STR'"
           echo "API User ID:           '$XF_API_USER'"
@@ -406,6 +429,7 @@ jobs:
             echo "Target API Resource:    https://forum.dice-dragons.de/api/resources/${RESOURCE_ID}/"
             echo "Title:                  $TITLE"
             echo "Version:                $VERSION_STRING"
+            echo "Add-on Tier:            $DD_TIER"
             echo "Attachment:             $ZIP_FILE"
             echo "Aggregated Files:       ${#FOUND_FILES[@]}"
             echo "Description File (EN):  ${README_FILE:-none}"
@@ -603,13 +627,40 @@ jobs:
           # Step 6: Post News Thread to Forum (Node 458, Prefix 612)
           if [ "$SHOULD_POST_NEWS" = "true" ]; then
             echo ""
-            echo "Step 6: Posting news thread to forum node 458 via /api/threads/..."
+            echo "Step 6: Posting news thread to forum node 458 via /api/threads/ (Tier: ${DD_TIER})..."
+
+            case "$DD_TIER" in
+              premium)
+                NEWS_INTRO_EN="A new version of the commercial [B]Premium Add-on[/B] [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] is now available in the [URL='${FAQ_URL}']Resource Manager[/URL] (commercial release – not available as a free download)."
+                NEWS_INTRO_DE="Eine neue Version des kostenpflichtigen [B]Premium-Add-ons[/B] [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] ist ab sofort im [URL='${FAQ_URL}']Ressourcen-Bereich[/URL] verfügbar (kostenpflichtige Version – kein kostenloser Download)."
+                EDITION_LABEL="Premium Add-on (Commercial / Kostenpflichtig)"
+                RESOURCE_LINK_LABEL="Resource Overview / Ressourcen-Übersicht"
+                ;;
+              rpg-suite-plus)
+                NEWS_INTRO_EN="A new version of [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] (part of [B][DD] RPG Suite Plus[/B]) is now available in the [URL='${FAQ_URL}']Resource Manager[/URL] (commercial Plus module – not available as a free download)."
+                NEWS_INTRO_DE="Eine neue Version von [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] (Teil der [B][DD] RPG Suite Plus[/B]) ist ab sofort im [URL='${FAQ_URL}']Ressourcen-Bereich[/URL] verfügbar (kostenpflichtiges Plus-Modul – kein kostenloser Download)."
+                EDITION_LABEL="[DD] RPG Suite Plus (Commercial / Kostenpflichtig)"
+                RESOURCE_LINK_LABEL="Resource Overview / Ressourcen-Übersicht"
+                ;;
+              rpg-suite)
+                NEWS_INTRO_EN="A new version of [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] (part of the free [B][DD] RPG Suite[/B]) is now available for free download in the [URL='${FAQ_URL}']Resource Manager[/URL]."
+                NEWS_INTRO_DE="Eine neue Version von [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] (Teil der kostenlosen [B][DD] RPG Suite[/B]) steht ab sofort kostenlos im [URL='${FAQ_URL}']Ressourcen-Bereich[/URL] zum Download bereit."
+                EDITION_LABEL="[DD] RPG Suite (Free / Kostenlos)"
+                RESOURCE_LINK_LABEL="Resource / Download"
+                ;;
+              *)
+                NEWS_INTRO_EN="A new version of [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] is now available for free download in the [URL='${FAQ_URL}']Resource Manager[/URL]."
+                NEWS_INTRO_DE="Eine neue Version von [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] steht ab sofort kostenlos im [URL='${FAQ_URL}']Ressourcen-Bereich[/URL] zum Download bereit."
+                EDITION_LABEL="Free Add-on / Kostenloses Add-on"
+                RESOURCE_LINK_LABEL="Resource / Download"
+                ;;
+            esac
 
             NEWS_MESSAGE="[HEADING=1]${ADDON_NAME} – Version ${VERSION_STRING}[/HEADING]"
             if [ -n "$DESCRIPTION" ]; then
               NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"[I]${DESCRIPTION}[/I]"
             fi
-            NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"[B]EN:[/B] A new version of [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] is now available for download in the [URL='${FAQ_URL}']Resource Manager[/URL]."$'\n'"[B]DE:[/B] Eine neue Version von [URL='${FAQ_URL}'][B]${ADDON_NAME}[/B][/URL] steht ab sofort im [URL='${FAQ_URL}']Ressourcen-Bereich[/URL] zum Download bereit."$'\n\n'"[HEADING=2]Changelog (${VERSION_STRING})[/HEADING]"$'\n\n'"[QUOTE]"$'\n'"${MESSAGE_CONTENT}"$'\n'"[/QUOTE]"$'\n\n'"[HEADING=2]Links & Download[/HEADING]"$'\n\n'"[LIST]"$'\n'"[*][B]Resource / Download:[/B] [URL='${FAQ_URL}']${ADDON_TITLE}[/URL]"
+            NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n\n'"[B]EN:[/B] ${NEWS_INTRO_EN}"$'\n'"[B]DE:[/B] ${NEWS_INTRO_DE}"$'\n\n'"[HEADING=2]Changelog (${VERSION_STRING})[/HEADING]"$'\n\n'"[QUOTE]"$'\n'"${MESSAGE_CONTENT}"$'\n'"[/QUOTE]"$'\n\n'"[HEADING=2]Links & Info[/HEADING]"$'\n\n'"[LIST]"$'\n'"[*][B]Edition / Lizenz:[/B] ${EDITION_LABEL}"$'\n'"[*][B]${RESOURCE_LINK_LABEL}:[/B] [URL='${FAQ_URL}']${ADDON_TITLE}[/URL]"
             if [ -n "$SUPPORT_URL" ]; then
               NEWS_MESSAGE="${NEWS_MESSAGE}"$'\n'"[*][B]Support & Discussion / Hilfe & Diskussion:[/B] [URL='${SUPPORT_URL}']Support Forum[/URL]"
             fi

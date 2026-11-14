@@ -51,6 +51,28 @@ $alwaysIncludeRepos = [
     'RPG',
 ];
 
+$defaultTierMap = [
+    'EasyWidgets' => 'premium',
+    'UserSelfDelete' => 'premium',
+    'AvatarStyles' => 'premium',
+    'ResourceGallery' => 'premium',
+    'RPG' => 'rpg-suite',
+    'DiceRoller' => 'rpg-suite',
+    'Handout' => 'rpg-suite',
+    'BattleMaps' => 'rpg-suite-plus',
+    'CharEdit' => 'rpg-suite-plus',
+];
+
+function formatDashboardTier(string $tier, string $lang): string
+{
+    return match ($tier) {
+        'premium' => '**Premium**',
+        'rpg-suite-plus' => '**RPG Suite Plus**',
+        'rpg-suite' => $lang === 'de' ? 'RPG Suite (Kostenlos)' : 'RPG Suite (Free)',
+        default => $lang === 'de' ? 'Kostenlos' : 'Free',
+    };
+}
+
 $rows = [];
 $allAddonMeta = [];
 
@@ -127,10 +149,22 @@ foreach ($repos as $r) {
     $title = $addonJson['title'] ?? $repoName;
     $version = $addonJson['version_string'] ?? '1.0.0';
 
+    // Fetch composer.json for extra.dd-tier (with fallback to $defaultTierMap)
+    $tier = $defaultTierMap[$repoName] ?? 'free';
+    $composerFileResp = githubApi("/repos/{$fullName}/contents/composer.json", $token);
+    if (is_array($composerFileResp) && !empty($composerFileResp['content'])) {
+        $composerRaw = base64_decode(trim((string)$composerFileResp['content']));
+        $composerData = json_decode($composerRaw, true);
+        if (is_array($composerData) && !empty($composerData['extra']['dd-tier']) && is_string($composerData['extra']['dd-tier'])) {
+            $tier = $composerData['extra']['dd-tier'];
+        }
+    }
+
     $meta = [
         'repo' => $repoName,
         'title' => $title,
         'version' => $version,
+        'tier' => $tier,
         'deps' => $depStr,
         'support' => $support,
         'published' => $hasPublishedRelease,
@@ -158,17 +192,18 @@ usort($rows, function ($a, $b) {
 $count = count($rows);
 echo "\nTotal dashboard add-ons: {$count}\n";
 
-$tableEn = "| Add-on | Version | Dependencies | Support |\n";
-$tableEn .= "| :--- | :--- | :--- | :--- |\n";
+$tableEn = "| Add-on | Edition | Version | Dependencies | Support |\n";
+$tableEn .= "| :--- | :--- | :--- | :--- | :--- |\n";
 
-$tableDe = "| Add-on | Version | Abhängigkeiten | Support |\n";
-$tableDe .= "| :--- | :--- | :--- | :--- |\n";
+$tableDe = "| Add-on | Edition | Version | Abhängigkeiten | Support |\n";
+$tableDe .= "| :--- | :--- | :--- | :--- | :--- |\n";
 
 foreach ($rows as $row) {
     $link = $row['support'] !== '' ? "[Forum]({$row['support']})" : '-';
-    $line = "| **{$row['title']}** | `{$row['version']}` | `{$row['deps']}` | {$link} |\n";
-    $tableEn .= $line;
-    $tableDe .= $line;
+    $tierEn = formatDashboardTier($row['tier'] ?? 'free', 'en');
+    $tierDe = formatDashboardTier($row['tier'] ?? 'free', 'de');
+    $tableEn .= "| **{$row['title']}** | {$tierEn} | `{$row['version']}` | `{$row['deps']}` | {$link} |\n";
+    $tableDe .= "| **{$row['title']}** | {$tierDe} | `{$row['version']}` | `{$row['deps']}` | {$link} |\n";
 }
 
 // Build RPG Suite Ecosystem Tables (EN & DE)
@@ -275,18 +310,21 @@ $rpgCatalog = [
     ],
 ];
 
-$rpgTableEn = "| Tier | Add-on | ID | Version | Role in the RPG Suite |\n";
-$rpgTableEn .= "| :--- | :--- | :--- | :--- | :--- |\n";
+$rpgTableEn = "| Layer | Add-on | ID | Edition | Version | Role in the RPG Suite |\n";
+$rpgTableEn .= "| :--- | :--- | :--- | :--- | :--- | :--- |\n";
 
-$rpgTableDe = "| Bereich | Add-on | ID | Version | Funktion innerhalb der RPG Suite |\n";
-$rpgTableDe .= "| :--- | :--- | :--- | :--- | :--- |\n";
+$rpgTableDe = "| Bereich | Add-on | ID | Edition | Version | Funktion innerhalb der RPG Suite |\n";
+$rpgTableDe .= "| :--- | :--- | :--- | :--- | :--- | :--- |\n";
 
 foreach ($rpgCatalog as $item) {
     $meta = $allAddonMeta[$item['repo']] ?? (isset($item['alt_repo']) ? ($allAddonMeta[$item['alt_repo']] ?? null) : null);
     $title = $item['default_title'];
     $ver = $meta['version'] ?? '1.0.0 Beta 1';
-    $rpgTableEn .= "| **{$item['role_en']}** | **{$title}** | `{$item['addon_id']}` | `{$ver}` | {$item['desc_en']} |\n";
-    $rpgTableDe .= "| **{$item['role_de']}** | **{$title}** | `{$item['addon_id']}` | `{$ver}` | {$item['desc_de']} |\n";
+    $itemTier = $meta['tier'] ?? ($defaultTierMap[$item['repo']] ?? 'free');
+    $tierEn = formatDashboardTier($itemTier, 'en');
+    $tierDe = formatDashboardTier($itemTier, 'de');
+    $rpgTableEn .= "| **{$item['role_en']}** | **{$title}** | `{$item['addon_id']}` | {$tierEn} | `{$ver}` | {$item['desc_en']} |\n";
+    $rpgTableDe .= "| **{$item['role_de']}** | **{$title}** | `{$item['addon_id']}` | {$tierDe} | `{$ver}` | {$item['desc_de']} |\n";
 }
 
 $readmeEn = <<<MD

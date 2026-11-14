@@ -137,6 +137,15 @@ if (file_exists($composerJsonFile)) {
             logWarning($composerJsonFile, 1, "composer.json license should be 'proprietary' (got '" . ($composerJson['license'] ?? '') . "').");
         }
 
+        // extra.dd-tier check
+        $validTiers = ['free', 'premium', 'rpg-suite', 'rpg-suite-plus'];
+        $ddTier = $composerJson['extra']['dd-tier'] ?? null;
+        if (!is_string($ddTier) || $ddTier === '') {
+            logWarning($composerJsonFile, 1, "composer.json is missing 'extra.dd-tier' (expected one of: " . implode(', ', $validTiers) . ").");
+        } elseif (!in_array($ddTier, $validTiers, true)) {
+            logError($composerJsonFile, 1, "composer.json 'extra.dd-tier' has invalid value '{$ddTier}' (allowed: " . implode(', ', $validTiers) . ").");
+        }
+
         // PHP requirement check
         $composerRequires = $composerJson['require'] ?? [];
         if (!isset($composerRequires['php'])) {
