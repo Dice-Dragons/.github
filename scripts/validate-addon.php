@@ -77,9 +77,14 @@ if (!file_exists($addonJsonFile)) {
 
         // Check PHP baseline in require
         $requires = $addonJson['require'] ?? [];
-        foreach (['cv6/zzzInternal'] as $internalDep) {
+        foreach (['cv6/zzzInternal', 'cv6/zzzDD'] as $internalDep) {
             if (isset($requires[$internalDep]) || isset($addonJson['require-soft'][$internalDep])) {
                 logError($addonJsonFile, 1, "Public add-on must never depend on private/internal add-on '{$internalDep}'.");
+            }
+        }
+        foreach (array_merge(array_keys($requires), array_keys($addonJson['require-soft'] ?? [])) as $depKey) {
+            if (preg_match('#^cv6/zzz#i', (string)$depKey)) {
+                logError($addonJsonFile, 1, "Public add-on must never depend on private/internal add-on '{$depKey}'.");
             }
         }
         if (!isset($requires['php'])) {

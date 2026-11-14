@@ -39,6 +39,7 @@ $excludeRepos = [
     'Settings',
     'Vorgify',
     'zzzInternal',
+    'zzzDD',
     'cv6-AI-Skills',
     'XenForo-AI-Skills',
     'BookList',
@@ -58,7 +59,7 @@ echo "Scanning for XenForo add-ons...\n\n";
 
 foreach ($repos as $r) {
     $repoName = $r['name'];
-    if (in_array($repoName, $excludeRepos, true)) {
+    if (in_array($repoName, $excludeRepos, true) || str_starts_with($repoName, 'zzz')) {
         continue;
     }
 
