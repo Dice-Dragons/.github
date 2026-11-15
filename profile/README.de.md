@@ -30,14 +30,14 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 
 ## 📊 Live Suite-Dashboard
 
-Übersicht aller 23 aktiven Add-ons der Suite:
+Übersicht aller 24 aktiven Add-ons der Suite:
 
 | Add-on | Edition | Version | Abhängigkeiten | Support |
 | :--- | :--- | :--- | :--- | :--- |
 | **[DD] - Core Library** | Kostenlos | `1.6.3` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
 | **[DD] RPG Suite** | RPG Suite (Kostenlos) | `1.0.0 Beta 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
 | **[DD] Admin Tools** | Kostenlos | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
-| **[DD] Avatar Style Chooser** | **Premium** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/timeline-visualizer/) |
+| **[DD] Avatar Style Chooser** | **Premium** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
 | **[DD] BattleMap Generator** | **RPG Suite Plus** | `1.0.0 Beta 1` | `^1.6.3 + RPG` | [Forum](https://forum.dice-dragons.de/forum/battle-map-generator/) |
 | **[DD] Bump** | Kostenlos | `1.0.0` | `-` | [Forum](https://forum.dice-dragons.de/forum/bump/) |
 | **[DD] Character Database** | **RPG Suite Plus** | `1.2.0 Release Candidate 5` | `^1.6.3 + CustomFields, RPG` | [Forum](https://forum.dice-dragons.de/forum/character/) |
@@ -45,6 +45,7 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | **[DD] Dice Roller** | RPG Suite (Kostenlos) | `3.0.0 Beta 1` | `^1.6.3 + RPG` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
 | **[DD] Discord Hook Enhancements** | Kostenlos | `1.0.0` | `-` | - |
 | **[DD] Font Manager** | Kostenlos | `1.0.0 Release Candidate 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/font-manager/) |
+| **[DD] Handout Generator** | RPG Suite (Kostenlos) | `2.0.0 Beta 1` | `^1.6.3 + RPG, FontManager` | [Forum](https://forum.dice-dragons.de/forum/handout/) |
 | **[DD] Icon Interface: Game-Icons.net** | Kostenlos | `1.0.0 Beta 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
 | **[DD] Icon Interface: Google Material** | Kostenlos | `1.0.0 Beta 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/icon-interfaces/) |
 | **[DD] Icon for new Posts** | Kostenlos | `1.1.2` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/new-post-icon/) |
@@ -55,9 +56,8 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | **[DD] Notebook** | Kostenlos | `1.1.0 Release Candidate 1` | `^1.4.2` | - |
 | **[DD] Notice Countdown** | Kostenlos | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
 | **[DD] Prefix Tools** | Kostenlos | `1.3.8` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/prefix-tools/) |
-| **[DD] Resource Gallery** | **Premium** | `1.1.0 Release Candidate 2` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
+| **[DD] Resource Gallery** | Kostenlos | `1.1.0 Release Candidate 2` | `^1.6.3 + CustomFields, XFRM` | [Forum](https://forum.dice-dragons.de/forum/resource-gallery/) |
 | **[DD] Timeline** | Kostenlos | `1.0.1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/) |
-
 
 
 ---
