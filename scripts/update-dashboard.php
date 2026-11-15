@@ -16,6 +16,7 @@ declare(strict_types=1);
 $rootDir = dirname(__DIR__);
 $readmeFileEn = $rootDir . DIRECTORY_SEPARATOR . 'profile' . DIRECTORY_SEPARATOR . 'README.md';
 $readmeFileDe = $rootDir . DIRECTORY_SEPARATOR . 'profile' . DIRECTORY_SEPARATOR . 'README.de.md';
+$versionsFile = $rootDir . DIRECTORY_SEPARATOR . 'versions.json';
 
 $token = getenv('GH_TOKEN') ?: getenv('GITHUB_TOKEN') ?: null;
 
@@ -73,8 +74,16 @@ function formatDashboardTier(string $tier, string $lang): string
     };
 }
 
+$repoAddonIdMap = [
+    'TimeLine' => 'cv6/Timeline',
+    'MMF-Connector' => 'cv6/MMF',
+    'Resource-Gallery' => 'cv6/ResourceGallery',
+    'LaunchPad' => 'cv6/Launchpad',
+];
+
 $rows = [];
 $allAddonMeta = [];
+$versionsJson = [];
 
 echo "Found " . count($repos) . " repositories in organization.\n";
 echo "Scanning for XenForo add-ons...\n\n";
@@ -148,6 +157,7 @@ foreach ($repos as $r) {
     $support = $addonJson['support_url'] ?? $addonJson['faq_url'] ?? '';
     $title = $addonJson['title'] ?? $repoName;
     $version = $addonJson['version_string'] ?? '1.0.0';
+    $addonId = $repoAddonIdMap[$repoName] ?? ('cv6/' . $repoName);
 
     // Fetch composer.json for extra.dd-tier (with fallback to $defaultTierMap)
     $tier = $defaultTierMap[$repoName] ?? 'free';
@@ -167,6 +177,18 @@ foreach ($repos as $r) {
         'tier' => $tier,
         'deps' => $depStr,
         'support' => $support,
+        'published' => $hasPublishedRelease,
+    ];
+
+    $versionsJson[$addonId] = [
+        'addon_id' => $addonId,
+        'repo' => $repoName,
+        'title' => $title,
+        'version_id' => (int)($addonJson['version_id'] ?? 0),
+        'version_string' => (string)($addonJson['version_string'] ?? $version),
+        'faq_url' => (string)($addonJson['faq_url'] ?? ''),
+        'support_url' => (string)($addonJson['support_url'] ?? ''),
+        'tier' => $tier,
         'published' => $hasPublishedRelease,
     ];
 
@@ -417,7 +439,12 @@ if (!is_dir(dirname($readmeFileEn))) {
 
 file_put_contents($readmeFileEn, $readmeEn);
 file_put_contents($readmeFileDe, $readmeDe);
-echo "✅ Successfully written {$count} add-ons to {$readmeFileEn} and {$readmeFileDe}!\n";
+ksort($versionsJson);
+file_put_contents(
+    $versionsFile,
+    json_encode($versionsJson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n"
+);
+echo "✅ Successfully written {$count} add-ons to {$readmeFileEn} and {$readmeFileDe}, and " . count($versionsJson) . " entries to {$versionsFile}!\n";
 
 // ==========================================================================
 // Native PHP cURL Functions
