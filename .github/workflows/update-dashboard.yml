@@ -2,7 +2,7 @@ name: "Update Suite Dashboard"
 
 on:
   schedule:
-    - cron: "0 */6 * * *" # Alle 6 Stunden
+    - cron: "*/30 * * * *" # Alle 30 Minuten
   workflow_dispatch:   # Manueller "Run workflow"-Button auf GitHub
 
 jobs:

@@ -23,8 +23,6 @@ on:
         required: true
       XENFORO_API_USER_ID:
         required: true
-      PROFILE_PAT:
-        required: false
 
   workflow_dispatch:
     inputs:
@@ -690,11 +688,3 @@ jobs:
             echo ""
             echo "Step 6: Skipping news thread (disabled via input or <!-- no-news --> flag)."
           fi
-
-      - name: Trigger Suite Dashboard & versions.json Update
-        if: ${{ !inputs.dry_run }}
-        env:
-          GH_TOKEN: ${{ secrets.PROFILE_PAT || secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Triggering update-dashboard.yml in Dice-Dragons/.github..."
-          gh workflow run update-dashboard.yml --repo Dice-Dragons/.github || echo "::warning::Could not trigger update-dashboard.yml (ensure PROFILE_PAT is available)."

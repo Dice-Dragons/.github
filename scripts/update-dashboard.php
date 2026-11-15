@@ -97,20 +97,29 @@ foreach ($repos as $r) {
     $fullName = "Dice-Dragons/{$repoName}";
 
     // Check if repository has published releases
-    $releases = githubApi("/repos/{$fullName}/releases?per_page=5", $token);
+    $releases = githubApi("/repos/{$fullName}/releases?per_page=10", $token);
 
     $hasPublishedRelease = false;
+    $latestPublishedTag = null;
+    $latestPublishedTs = 0;
     if (is_array($releases)) {
         foreach ($releases as $rel) {
             if (empty($rel['draft'])) {
                 $hasPublishedRelease = true;
-                break;
+                $ts = strtotime((string)($rel['published_at'] ?? $rel['created_at'] ?? '')) ?: 0;
+                if ($latestPublishedTag === null || $ts >= $latestPublishedTs) {
+                    $latestPublishedTs = $ts;
+                    if (!empty($rel['tag_name']) && is_string($rel['tag_name'])) {
+                        $latestPublishedTag = $rel['tag_name'];
+                    }
+                }
             }
         }
     }
 
-    // Fetch addon.json from repo
-    $addonFileResp = githubApi("/repos/{$fullName}/contents/addon.json", $token);
+    // Fetch addon.json from latest published release tag when available so unpublished drafts on main are ignored
+    $refQuery = $latestPublishedTag !== null ? '?ref=' . rawurlencode($latestPublishedTag) : '';
+    $addonFileResp = githubApi("/repos/{$fullName}/contents/addon.json{$refQuery}", $token);
     if (!is_array($addonFileResp) || empty($addonFileResp['content'])) {
         continue;
     }
@@ -161,7 +170,7 @@ foreach ($repos as $r) {
 
     // Fetch composer.json for extra.dd-tier (with fallback to $defaultTierMap)
     $tier = $defaultTierMap[$repoName] ?? 'free';
-    $composerFileResp = githubApi("/repos/{$fullName}/contents/composer.json", $token);
+    $composerFileResp = githubApi("/repos/{$fullName}/contents/composer.json{$refQuery}", $token);
     if (is_array($composerFileResp) && !empty($composerFileResp['content'])) {
         $composerRaw = base64_decode(trim((string)$composerFileResp['content']));
         $composerData = json_decode($composerRaw, true);
