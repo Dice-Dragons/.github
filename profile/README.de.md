@@ -14,7 +14,7 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | Bereich | Add-on | ID | Edition | Version | Funktion innerhalb der RPG Suite |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Basis & Infrastruktur** | **[DD] - Core Library** | `cv6/Core` | Kostenlos | `1.6.3` | Gemeinsame UI-Komponenten, Icon-Picker, Vergleichsoperatoren & Basis-Helper |
-| **Basis & Infrastruktur** | **[DD] RPG Suite** | `cv6/RPG` | RPG Suite (Kostenlos) | `1.0.0 Beta 1` | Zentrale Genres, Verlage (Publishers), Kampagnen-Content-Bridge & RPG-Dashboard |
+| **Basis & Infrastruktur** | **[DD] RPG Suite** | `cv6/RPG` | RPG Suite (Kostenlos) | `1.0.0 Beta 2` | Zentrale Genres, Verlage (Publishers), Kampagnen-Content-Bridge & RPG-Dashboard |
 | **Basis & Infrastruktur** | **[DD] Custom Fields Extension** | `cv6/CustomFields` | Kostenlos | `1.9.0 Release Candidate 1` | Erweiterte Zusatzfelder, Formel-Berechnungen, Feld-Abhängigkeiten & EntityChooser |
 | **Kern-Modul** | **[DD] Character Database** | `cv6/CharEdit` | **RPG Suite Plus** | `1.2.0 Release Candidate 5` | Charakterbögen, Settings, Archetypen, Fähigkeiten, Zauber & Kampagnen |
 | **Kern-Modul** | **[DD] Dice Roller** | `cv6/DiceRoller` | RPG Suite (Kostenlos) | `3.0.0 Beta 1` | Würfel-Engine, Regel-Pipelines, Wiresets, visuelle Würfel-Sets & Charakterbogen-Würfeltrigger |
@@ -35,7 +35,7 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | Add-on | Edition | Version | Abhängigkeiten | Support |
 | :--- | :--- | :--- | :--- | :--- |
 | **[DD] - Core Library** | Kostenlos | `1.6.3` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
-| **[DD] RPG Suite** | RPG Suite (Kostenlos) | `1.0.0 Beta 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
+| **[DD] RPG Suite** | RPG Suite (Kostenlos) | `1.0.0 Beta 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
 | **[DD] Admin Tools** | Kostenlos | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
 | **[DD] Avatar Style Chooser** | **Premium** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
 | **[DD] BattleMap Generator** | **RPG Suite Plus** | `1.0.0 Beta 1` | `^1.6.3 + RPG` | [Forum](https://forum.dice-dragons.de/forum/battle-map-generator/) |

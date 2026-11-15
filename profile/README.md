@@ -14,7 +14,7 @@ This organization hosts and maintains the official XenForo 2.3+ add-on suite dev
 | Layer | Add-on | ID | Edition | Version | Role in the RPG Suite |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Foundation** | **[DD] - Core Library** | `cv6/Core` | Free | `1.6.3` | Shared UI components, icon chooser, operators, and base helpers |
-| **Foundation** | **[DD] RPG Suite** | `cv6/RPG` | RPG Suite (Free) | `1.0.0 Beta 1` | Central genres, publishers, campaign content bridge, and RPG dashboard |
+| **Foundation** | **[DD] RPG Suite** | `cv6/RPG` | RPG Suite (Free) | `1.0.0 Beta 2` | Central genres, publishers, campaign content bridge, and RPG dashboard |
 | **Foundation** | **[DD] Custom Fields Extension** | `cv6/CustomFields` | Free | `1.9.0 Release Candidate 1` | Extended custom field types, calculations, dependencies, and EntityChooser |
 | **Core Module** | **[DD] Character Database** | `cv6/CharEdit` | **RPG Suite Plus** | `1.2.0 Release Candidate 5` | Character sheets, settings, archetypes, abilities, spells, and campaigns |
 | **Core Module** | **[DD] Dice Roller** | `cv6/DiceRoller` | RPG Suite (Free) | `3.0.0 Beta 1` | Dice rolling engine, rule pipelines, wiresets, visual dice sets, and character sheet roll triggers |
@@ -35,7 +35,7 @@ Overview of all 24 active add-ons in the suite:
 | Add-on | Edition | Version | Dependencies | Support |
 | :--- | :--- | :--- | :--- | :--- |
 | **[DD] - Core Library** | Free | `1.6.3` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
-| **[DD] RPG Suite** | RPG Suite (Free) | `1.0.0 Beta 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
+| **[DD] RPG Suite** | RPG Suite (Free) | `1.0.0 Beta 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
 | **[DD] Admin Tools** | Free | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
 | **[DD] Avatar Style Chooser** | **Premium** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
 | **[DD] BattleMap Generator** | **RPG Suite Plus** | `1.0.0 Beta 1` | `^1.6.3 + RPG` | [Forum](https://forum.dice-dragons.de/forum/battle-map-generator/) |
