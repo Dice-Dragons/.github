@@ -13,10 +13,10 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 
 | Bereich | Add-on | ID | Edition | Version | Funktion innerhalb der RPG Suite |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Basis & Infrastruktur** | **[DD] - Core Library** | `cv6/Core` | Kostenlos | `1.6.3` | Gemeinsame UI-Komponenten, Icon-Picker, Vergleichsoperatoren & Basis-Helper |
-| **Basis & Infrastruktur** | **[DD] RPG Suite** | `cv6/RPG` | RPG Suite (Kostenlos) | `1.0.0 Beta 2` | Zentrale Genres, Verlage (Publishers), Kampagnen-Content-Bridge & RPG-Dashboard |
-| **Basis & Infrastruktur** | **[DD] Custom Fields Extension** | `cv6/CustomFields` | Kostenlos | `1.9.0 Release Candidate 1` | Erweiterte Zusatzfelder, Formel-Berechnungen, Feld-Abhängigkeiten & EntityChooser |
-| **Kern-Modul** | **[DD] Character Database** | `cv6/CharEdit` | **RPG Suite Plus** | `1.2.0 Release Candidate 4` | Charakterbögen, Settings, Archetypen, Fähigkeiten, Zauber & Kampagnen |
+| **Basis & Infrastruktur** | **[DD] - Core Library** | `cv6/Core` | Kostenlos | `1.6.4` | Gemeinsame UI-Komponenten, Icon-Picker, Vergleichsoperatoren & Basis-Helper |
+| **Basis & Infrastruktur** | **[DD] RPG Suite** | `cv6/RPG` | RPG Suite (Kostenlos) | `1.0.0 Beta 3` | Zentrale Genres, Verlage (Publishers), Kampagnen-Content-Bridge & RPG-Dashboard |
+| **Basis & Infrastruktur** | **[DD] Custom Fields Extension** | `cv6/CustomFields` | Kostenlos | `1.9.0 Release Candidate 2` | Erweiterte Zusatzfelder, Formel-Berechnungen, Feld-Abhängigkeiten & EntityChooser |
+| **Kern-Modul** | **[DD] Character Database** | `cv6/CharEdit` | **RPG Suite Plus** | `1.2.0 Release Candidate 6` | Charakterbögen, Settings, Archetypen, Fähigkeiten, Zauber & Kampagnen |
 | **Kern-Modul** | **[DD] Dice Roller** | `cv6/DiceRoller` | RPG Suite (Kostenlos) | `2.8.1` | Würfel-Engine, Regel-Pipelines, Wiresets, visuelle Würfel-Sets & Charakterbogen-Würfeltrigger |
 | **Kern-Modul** | **[DD] BattleMap Generator** | `cv6/BattleMaps` | **RPG Suite Plus** | `1.0.0 Beta 1` | Prozeduraler Dungeon- & Gebäude-Generator, interaktiver Viewer & Karten-Galerie |
 | **Kern-Modul** | **[DD] Handout Generator** | `cv6/Handout` | RPG Suite (Kostenlos) | `2.0.0 Beta 1` | In-Game-Briefe, Pergamente & geteilte Kampagnen-Handouts |
@@ -30,18 +30,18 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 
 ## 📊 Live Suite-Dashboard
 
-Übersicht aller 24 aktiven Add-ons der Suite:
+Übersicht aller 25 aktiven Add-ons der Suite:
 
 | Add-on | Edition | Version | Abhängigkeiten | Support |
 | :--- | :--- | :--- | :--- | :--- |
-| **[DD] - Core Library** | Kostenlos | `1.6.3` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
-| **[DD] RPG Suite** | RPG Suite (Kostenlos) | `1.0.0 Beta 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
+| **[DD] - Core Library** | Kostenlos | `1.6.4` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
+| **[DD] RPG Suite** | RPG Suite (Kostenlos) | `1.0.0 Beta 3` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
 | **[DD] Admin Tools** | Kostenlos | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
 | **[DD] Avatar Style Chooser** | **Premium** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
 | **[DD] BattleMap Generator** | **RPG Suite Plus** | `1.0.0 Beta 1` | `^1.6.3 + RPG` | [Forum](https://forum.dice-dragons.de/forum/battle-map-generator/) |
 | **[DD] Bump** | Kostenlos | `1.0.0` | `-` | [Forum](https://forum.dice-dragons.de/forum/bump/) |
-| **[DD] Character Database** | **RPG Suite Plus** | `1.2.0 Release Candidate 4` | `^1.6.3 + CustomFields` | [Forum](https://forum.dice-dragons.de/forum/character/) |
-| **[DD] Custom Fields Extension** | Kostenlos | `1.9.0 Release Candidate 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
+| **[DD] Character Database** | **RPG Suite Plus** | `1.2.0 Release Candidate 6` | `^1.6.3 + CustomFields, RPG` | [Forum](https://forum.dice-dragons.de/forum/character/) |
+| **[DD] Custom Fields Extension** | Kostenlos | `1.9.0 Release Candidate 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
 | **[DD] Dice Roller** | RPG Suite (Kostenlos) | `2.8.1` | `^1.6.1` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
 | **[DD] Discord Hook Enhancements** | Kostenlos | `1.0.0` | `-` | - |
 | **[DD] Font Manager** | Kostenlos | `1.0.0 Release Candidate 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/font-manager/) |
@@ -52,6 +52,7 @@ Die **[DD] RPG Suite (`cv6/RPG`)** bildet die zentrale Plattform für Tabletop- 
 | **[DD] Index for Forums** | Kostenlos | `1.3.0` | `^1.5.0` | [Forum](https://forum.dice-dragons.de/forum/abc-index/) |
 | **[DD] Launchpad** | Kostenlos | `1.0.0 Release Candidate 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/) |
 | **[DD] License** | Kostenlos | `1.1.1` | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/license-checker/) |
+| **[DD] MCP Server** | Kostenlos | `1.0.0 Beta 1` | `-` | [Forum](https://forum.dice-dragons.de/forum/mcp-server/) |
 | **[DD] Node Icons & Tools** | Kostenlos | `1.5.12` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/node-icon/) |
 | **[DD] Notebook** | Kostenlos | `1.1.0 Release Candidate 1` | `^1.4.2` | - |
 | **[DD] Notice Countdown** | Kostenlos | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |

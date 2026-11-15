@@ -13,10 +13,10 @@ This organization hosts and maintains the official XenForo 2.3+ add-on suite dev
 
 | Layer | Add-on | ID | Edition | Version | Role in the RPG Suite |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Foundation** | **[DD] - Core Library** | `cv6/Core` | Free | `1.6.3` | Shared UI components, icon chooser, operators, and base helpers |
-| **Foundation** | **[DD] RPG Suite** | `cv6/RPG` | RPG Suite (Free) | `1.0.0 Beta 2` | Central genres, publishers, campaign content bridge, and RPG dashboard |
-| **Foundation** | **[DD] Custom Fields Extension** | `cv6/CustomFields` | Free | `1.9.0 Release Candidate 1` | Extended custom field types, calculations, dependencies, and EntityChooser |
-| **Core Module** | **[DD] Character Database** | `cv6/CharEdit` | **RPG Suite Plus** | `1.2.0 Release Candidate 4` | Character sheets, settings, archetypes, abilities, spells, and campaigns |
+| **Foundation** | **[DD] - Core Library** | `cv6/Core` | Free | `1.6.4` | Shared UI components, icon chooser, operators, and base helpers |
+| **Foundation** | **[DD] RPG Suite** | `cv6/RPG` | RPG Suite (Free) | `1.0.0 Beta 3` | Central genres, publishers, campaign content bridge, and RPG dashboard |
+| **Foundation** | **[DD] Custom Fields Extension** | `cv6/CustomFields` | Free | `1.9.0 Release Candidate 2` | Extended custom field types, calculations, dependencies, and EntityChooser |
+| **Core Module** | **[DD] Character Database** | `cv6/CharEdit` | **RPG Suite Plus** | `1.2.0 Release Candidate 6` | Character sheets, settings, archetypes, abilities, spells, and campaigns |
 | **Core Module** | **[DD] Dice Roller** | `cv6/DiceRoller` | RPG Suite (Free) | `2.8.1` | Dice rolling engine, rule pipelines, wiresets, visual dice sets, and character sheet roll triggers |
 | **Core Module** | **[DD] BattleMap Generator** | `cv6/BattleMaps` | **RPG Suite Plus** | `1.0.0 Beta 1` | Procedural dungeon & building generator, interactive viewer, and map gallery |
 | **Core Module** | **[DD] Handout Generator** | `cv6/Handout` | RPG Suite (Free) | `2.0.0 Beta 1` | In-game letters, parchments, and shared campaign handouts |
@@ -30,18 +30,18 @@ This organization hosts and maintains the official XenForo 2.3+ add-on suite dev
 
 ## 📊 Live Suite Dashboard
 
-Overview of all 24 active add-ons in the suite:
+Overview of all 25 active add-ons in the suite:
 
 | Add-on | Edition | Version | Dependencies | Support |
 | :--- | :--- | :--- | :--- | :--- |
-| **[DD] - Core Library** | Free | `1.6.3` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
-| **[DD] RPG Suite** | RPG Suite (Free) | `1.0.0 Beta 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
+| **[DD] - Core Library** | Free | `1.6.4` | `-` | [Forum](https://forum.dice-dragons.de/forum/core/) |
+| **[DD] RPG Suite** | RPG Suite (Free) | `1.0.0 Beta 3` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/rpg-suite/) |
 | **[DD] Admin Tools** | Free | `2.5.1` | `^1.5.1` | [Forum](https://forum.dice-dragons.de/forum/admin-tools/) |
 | **[DD] Avatar Style Chooser** | **Premium** | `1.0.0 Beta 1` | `^1.3.1` | [Forum](https://forum.dice-dragons.de/forum/avatar-styles/) |
 | **[DD] BattleMap Generator** | **RPG Suite Plus** | `1.0.0 Beta 1` | `^1.6.3 + RPG` | [Forum](https://forum.dice-dragons.de/forum/battle-map-generator/) |
 | **[DD] Bump** | Free | `1.0.0` | `-` | [Forum](https://forum.dice-dragons.de/forum/bump/) |
-| **[DD] Character Database** | **RPG Suite Plus** | `1.2.0 Release Candidate 4` | `^1.6.3 + CustomFields` | [Forum](https://forum.dice-dragons.de/forum/character/) |
-| **[DD] Custom Fields Extension** | Free | `1.9.0 Release Candidate 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
+| **[DD] Character Database** | **RPG Suite Plus** | `1.2.0 Release Candidate 6` | `^1.6.3 + CustomFields, RPG` | [Forum](https://forum.dice-dragons.de/forum/character/) |
+| **[DD] Custom Fields Extension** | Free | `1.9.0 Release Candidate 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/custom-fields/) |
 | **[DD] Dice Roller** | RPG Suite (Free) | `2.8.1` | `^1.6.1` | [Forum](https://forum.dice-dragons.de/forum/dice-roller/) |
 | **[DD] Discord Hook Enhancements** | Free | `1.0.0` | `-` | - |
 | **[DD] Font Manager** | Free | `1.0.0 Release Candidate 2` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/font-manager/) |
@@ -52,6 +52,7 @@ Overview of all 24 active add-ons in the suite:
 | **[DD] Index for Forums** | Free | `1.3.0` | `^1.5.0` | [Forum](https://forum.dice-dragons.de/forum/abc-index/) |
 | **[DD] Launchpad** | Free | `1.0.0 Release Candidate 1` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/) |
 | **[DD] License** | Free | `1.1.1` | `^1.6.2` | [Forum](https://forum.dice-dragons.de/forum/license-checker/) |
+| **[DD] MCP Server** | Free | `1.0.0 Beta 1` | `-` | [Forum](https://forum.dice-dragons.de/forum/mcp-server/) |
 | **[DD] Node Icons & Tools** | Free | `1.5.12` | `^1.6.3` | [Forum](https://forum.dice-dragons.de/forum/node-icon/) |
 | **[DD] Notebook** | Free | `1.1.0 Release Candidate 1` | `^1.4.2` | - |
 | **[DD] Notice Countdown** | Free | `1.0.4` | `^1.4.2` | [Forum](https://forum.dice-dragons.de/forum/notice-countdown/) |
