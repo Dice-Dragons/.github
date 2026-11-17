@@ -109,6 +109,17 @@
         "tier": "free",
         "published": true
     },
+    "cv6/EasyWidgets": {
+        "addon_id": "cv6/EasyWidgets",
+        "repo": "EasyWidgets",
+        "title": "[DD] Easy Widget Editor",
+        "version_id": 1000031,
+        "version_string": "1.0.0 Beta 1",
+        "faq_url": "https://forum.dice-dragons.de/downloads/easy-widget-manager.196/",
+        "support_url": "https://forum.dice-dragons.de/forum/easy-widgets/",
+        "tier": "premium",
+        "published": false
+    },
     "cv6/FAQ": {
         "addon_id": "cv6/FAQ",
         "repo": "FAQ",
